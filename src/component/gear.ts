@@ -1,27 +1,31 @@
 export interface GearProps {
   teeth: number; // Nombre de dents
   radius: number; // Rayon en pixels
-  rotationSpeed: number; // Vitesse de rotation en degrés/seconde
-  clockwise: boolean; // Sens de rotation (horaire/antihoraire)
+  rotationSpeed?: number | undefined; // Vitesse de rotation en degrés/seconde
+  clockwise?: boolean | undefined; // Sens de rotation (horaire/antihoraire)
   position: { x: number; y: number }; // Position (x, y) en pixels
 }
 
 export class Gear {
   private element: HTMLElement;
   private props: GearProps;
-  private svg: string; // SVG du gear
 
-  constructor(parent: HTMLElement, props: GearProps, svg: string) {
+  constructor(parent: HTMLElement, props: GearProps, svg: string, texturePath: string) {
     this.props = props;
-    this.svg = svg; // Le SVG est défini à l'initialisation et ne peut pas changer
 
     // Créer l'élément HTML
     this.element = document.createElement('div');
     this.element.classList.add('gear');
-    this.element.innerHTML = this.svg
-    parent.appendChild(this.element);
+
+    this.element.style.backgroundColor = 'black'
+    this.element.style.backgroundImage = `url('${texturePath}')`; // Appliquer la texture comme fond
+
+    // Utiliser le SVG comme masque
+    this.element.style.mask = `url('${svg}') 0 0/${this.props.radius * 2}px ${this.props.radius * 2}px no-repeat`;
 
     this.render();
+    parent.appendChild(this.element);
+
   }
 
   // Mettre à jour les propriétés dynamiquement (position, vitesse, sens, etc.)
@@ -36,13 +40,15 @@ export class Gear {
     // Appliquer les styles dynamiquement
     this.element.style.width = `${radius * 2}px`;
     this.element.style.height = `${radius * 2}px`;
-    this.element.style.borderRadius = '50%';
+
     this.element.style.position = 'absolute';
     this.element.style.left = `${position.x}px`;
     this.element.style.top = `${position.y}px`;
-    this.element.style.backgroundSize = 'cover';
-    this.element.style.animation = `rotate ${360 / rotationSpeed
-      }s linear infinite`;
-    this.element.style.animationDirection = clockwise ? 'normal' : 'reverse';
+    if (rotationSpeed) {
+      this.element.style.animation = `rotate ${360 / rotationSpeed}s linear infinite`;
+      this.element.style.animationDirection = clockwise ? 'normal' : 'reverse';
+    } else {
+      this.element.style.animation = '';
+    }
   }
 }

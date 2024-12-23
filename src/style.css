@@ -10,7 +10,7 @@
 .gear {
   display: block; /* Assure que l'élément est visible */
   background-repeat: no-repeat; /* Supprime les répétitions */
-  background-size: contain; /* Ajuste la taille du SVG à l'élément */
+  background-size: cover; /* Ajuste la taille du SVG à l'élément */
   background-position: center; /* Centre l'image */
-  border: 1px solid #ccc; /* Ligne pour visualiser la bordure */
+  position : absolute;
 }
