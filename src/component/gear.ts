@@ -18,6 +18,7 @@ export class Gear {
     // Créer l'élément HTML
     this.element = document.createElement('div');
     this.element.classList.add('gear');
+    this.element.innerHTML = this.svg
     parent.appendChild(this.element);
 
     this.render();
@@ -39,13 +40,9 @@ export class Gear {
     this.element.style.position = 'absolute';
     this.element.style.left = `${position.x}px`;
     this.element.style.top = `${position.y}px`;
-    this.element.style.backgroundImage = `url('data:image/svg+xml;utf8,${encodeURIComponent(
-      this.svg
-    )}')`;// Encodage inline du SVG
-    this.element.style.backgroundSize = 'contain';
-    this.element.style.animation = `rotate ${
-      360 / rotationSpeed
-    }s linear infinite`;
+    this.element.style.backgroundSize = 'cover';
+    this.element.style.animation = `rotate ${360 / rotationSpeed
+      }s linear infinite`;
     this.element.style.animationDirection = clockwise ? 'normal' : 'reverse';
   }
 }

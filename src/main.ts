@@ -1,6 +1,6 @@
 import './style.css';
 import { Gear } from './component/gear';
-import gearSVG from '/gear-svgrepo-com.svg'
+import gearSVG from '/gear-svgrepo-com.svg?raw';
 // Exemple de SVG pour un engrenage
 
 // const gearSVG = `
