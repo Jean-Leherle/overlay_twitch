@@ -1,30 +1,35 @@
 import './style.css';
 import { Gear } from './component/gear';
-import texture1 from '/copper.png'
+import texture1 from '/texture/copper.png'
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
 // Instancier un engrenage
 const gear1Component = new Gear(app, {
-  teeth: 12,
+  teeth: { number: 8, height: 20, width: 15 },
   radius: 50,
-  rotationSpeed: 30,
-  clockwise: false,
   position: { x: 50, y: 50 },
-}, '/gear1.svg', texture1);
+  zIndex: 2,
+}, '/mask/gear1.svg', texture1);
 
-let i = 1
+const gear2Component = new Gear(app, {
+  teeth: { number: 8, height: 20, width: 15 },
+  radius: 50,
+  position: { x: 100, y: 50 },
+  zIndex: 1,
+  clockwise: true,
+  rotationSpeed: 50
+}, '/mask/gear1.svg', texture1);
 
-setInterval(() => {
-  gear1Component.updateProps({
-    position: {
-      x: i, y: 50
-    }
-  });
-  if (i % 2 === 0) i += 2
-  else i -= 2
+Promise.all([
+  (async () => {
+    await gear1Component.transtalteTo({ x: 500, y: 200 }, 5000);
+    await gear1Component.transtalteTo({ x: 50, y: 50 }, 5000);
+  })(),
+  gear2Component.transtalteTo({ x: gear2Component.props.position.x, y: gear2Component.props.position.y + 100 }, 3000)
+])
 
-  if (i >= window.innerWidth - 100 || i <= 0) i++
-}
-  , 30)
+console.log(gear1Component.getDist(gear1Component.props.position, { x: 53, y: 46 }))
+
+
 
