@@ -4,10 +4,11 @@ export type StaticProps = {
 }
 
 export type VariableProps = {
-  rotationSpeed?: number; // Vitesse de rotation en degrés/seconde
-  clockwise?: boolean; // Sens de rotation (horaire/antihoraire)
   position: Position; // Position (x, y) en pixels
   zIndex: number;
+  clockwise?: boolean; // Sens de rotation (horaire/antihoraire)
+  rotationSpeed?: number; // Vitesse de rotation en degrés/seconde
+  rotateState?: number //état de rotation en deg 
 }
 export type GearProps = StaticProps & VariableProps
 export interface Position { x: number; y: number }
@@ -64,10 +65,26 @@ export class Gear {
     return Math.sqrt(Math.abs(origin.x - destination.x) ** 2 + Math.abs(origin.y - destination.y) ** 2)
   }
 
+  public async moveTo(destination: Position, delay: number): Promise<void> {
+    const { height } = this.props.teeth;
+    // Rayon intérieur (distance sur laquelle la dent s'engage)
+    const innerRadius = this.props.radius * (1 - height / 100);
+
+    // Distance totale à parcourir
+    const totalDistance = this.getDist(this.props.position, destination)
+    const innerCircumference = 2 * Math.PI * innerRadius;
+    const totalRotations = totalDistance / innerCircumference;
+    const rotateOffset = totalRotations % 1
+    const rotationSpeed = delay / (1000 * totalRotations)
+
+    this.updateProps({ rotationSpeed })
+    await this.transtalteTo(destination, delay)
+    this.updateProps({ rotationSpeed: 0, rotateState: this.props.clockwise ? rotateOffset * 360 : rotateOffset * -360 })
+  }
 
 
   private render() {
-    const { radius, rotationSpeed, clockwise, position, zIndex } = this.props;
+    const { radius, rotationSpeed, clockwise, position, zIndex, rotateState } = this.props;
 
     // Appliquer les styles dynamiquement
     this.element.style.width = `${radius * 2}px`;
@@ -75,8 +92,9 @@ export class Gear {
     this.element.style.left = `${position.x}px`;
     this.element.style.top = `${position.y}px`;
     this.element.style.zIndex = `${zIndex}`
+    if (rotateState != null) this.element.style.rotate = `${rotateState}deg`
     if (rotationSpeed) {
-      this.element.style.animation = `rotate ${360 / rotationSpeed}s linear infinite`;
+      this.element.style.animation = `rotate ${rotationSpeed}s linear infinite`;
       this.element.style.animationDirection = clockwise ? 'normal' : 'reverse';
     } else {
       this.element.style.animation = '';
