@@ -8,17 +8,21 @@
 } */
 
 .component {
-  display: block;
-  position : absolute;
-  isolation: isolate;
-  background: var(--component-texture) repeat center;
-  
+  position : absolute;  
 }
 
-.gear {
+.child-component {
+  position: relative;
+  isolation: isolate;
+  height: 100%;
+  width: 100%;
+  background: var(--component-texture) repeat center;
+}
+
+/* .gear {
   display: block;
   position : absolute;
   isolation: isolate;
   background: var(--gear-texture) no-repeat center;
   
-}
+} */

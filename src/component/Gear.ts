@@ -1,4 +1,4 @@
-import { Component, ComponentConfig } from "./Component";
+import { Component } from "./Component";
 import { Movable } from "./MovableComponent";
 import { Rotatable } from "./RotatableComponent";
 import { Position } from "../types/Position";
@@ -6,6 +6,7 @@ import { Position } from "../types/Position";
 export interface GearConfig {
   radius: number;
   position: Position;
+  zIndex: number
   visual: { texturePath: string; maskPath: string };
   teeth?: { number: number; height: number };
 }
@@ -22,7 +23,7 @@ export class Gear extends Base {
   ) {
     // Calcul de la taille à partir du rayon
     const size = { width: config.radius * 2, height: config.radius * 2 };
-    super(parent, { size, position: config.position, visual: config.visual });
+    super(parent, { size, position: config.position, visual: config.visual, zIndex: config.zIndex });
 
     this.radius = config.radius;
     this.teeth = config.teeth
@@ -31,10 +32,12 @@ export class Gear extends Base {
     this.applyTextureAndMask();
   }
   public applyTextureAndMask(): void {
-    this.element.style.setProperty('--component-texture', `url("${this.visual.texturePath}")`);
+    this.childElement.style.setProperty('--component-texture', `url("${this.visual.texturePath}")`);
 
     // Utiliser le SVG comme masque
-    this.element.style.mask = `url('${this.visual.maskPath}') 0 0/${this.radius * 2}px ${this.radius * 2}px no-repeat`;
+    this.childElement.style.mask = `url('${this.visual.maskPath}') 0 0/${this.radius * 2}px ${this.radius * 2}px no-repeat`;
+
+    this.applyTextureFilter()
   }
 
   public async mechanicalMoveTo(destination: Position, delay: number): Promise<void> {

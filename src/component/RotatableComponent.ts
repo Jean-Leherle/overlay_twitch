@@ -1,4 +1,10 @@
 import { Component } from "./Component";
+export interface RotatableProps {
+  rotationSpeed: number;
+  rotateState: number;
+  clockwise: 1 | -1;
+  updateRotation: () => void;
+}
 
 export function Rotatable<T extends new (...args: any[]) => Component>(Base: T) {
   return class extends Base {
@@ -15,8 +21,16 @@ export function Rotatable<T extends new (...args: any[]) => Component>(Base: T) 
       if (this.rotationSpeed > 0) {
         this.rotateState =
           (this.rotateState + this.clockwise * this.rotationSpeed) % 360;
-        this.element.style.transform = `rotate(${this.rotateState}deg)`;
+        this.parentElement.style.transform = `rotate(${this.rotateState}deg)`;
       }
     }
   };
+}
+
+export function isRotatable(component: Component): component is Component & RotatableProps {
+  return (
+    "rotationSpeed" in component &&
+    "rotateState" in component &&
+    "clockwise" in component
+  );
 }

@@ -33,8 +33,8 @@ export function Movable<T extends new (...args: any[]) => Component>(Base: T) {
     }
 
     public updatePosition(): void {
-      this.element.style.left = `${this.position.x}px`;
-      this.element.style.top = `${this.position.y}px`;
+      this.parentElement.style.left = `${this.position.x}px`;
+      this.parentElement.style.top = `${this.position.y}px`;
     }
   };
 }
