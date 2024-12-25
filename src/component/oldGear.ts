@@ -1,3 +1,4 @@
+import { v7 as uuid } from 'uuid'
 export type StaticProps = {
   teeth: { number: number, height: number, width: number }; // Nombre de dents
   radius: number; // Rayon en pixels
@@ -6,34 +7,65 @@ export type StaticProps = {
 export type VariableProps = {
   position: Position; // Position (x, y) en pixels
   zIndex: number;
-  clockwise?: boolean; // Sens de rotation (horaire/antihoraire)
+  clockwise?: 1 | -1; // Sens de rotation (horaire/antihoraire)
   rotationSpeed?: number; // Vitesse de rotation en degrés/seconde
-  rotateState?: number //état de rotation en deg 
+  rotateState?: number  //état de rotation en deg
+
 }
 export type GearProps = StaticProps & VariableProps
 export interface Position { x: number; y: number }
 
 export class Gear {
   static readonly UPDATEFREQUENCY: number = 25
-  private element: HTMLElement;
+  static gearsStore: Gear[] = []
+  public element: HTMLElement;
+  public label: string
   public props: GearProps;
+  public readonly id: string;
 
-  constructor(parent: HTMLElement, props: GearProps, svg: string, texturePath: string) {
+  constructor(parent: HTMLElement, props: GearProps, svg: string, texturePath: string, label?: string) {
+    this.id = `gear-${uuid()}`
+    this.label = label ?? this.id
     this.props = props;
-
-    // Créer l'élément HTML
-    this.element = document.createElement('div');
-    this.element.classList.add('gear');
-
-    this.element.style.setProperty('--gear-shadow', `url("${texturePath}")`);
-    this.element.style.setProperty('--gear-mask', `url('${svg}')`);
-
-    // Utiliser le SVG comme masque
-    this.element.style.mask = `url('${svg}') 0 0/${this.props.radius * 2}px ${this.props.radius * 2}px no-repeat`;
-
+    this.element = this.initElement(svg, texturePath)
     this.render();
     parent.appendChild(this.element);
+
+    setInterval(this.rotateMethod, Gear.UPDATEFREQUENCY)
+
+    Gear.gearsStore.push(this)
   }
+
+  private rotateMethod = () => {
+    if (this.props.rotationSpeed && this.props.rotationSpeed > 0) {
+      this.props.rotateState ??= 0
+      this.props.rotateState = this.props.rotateState + (this.props.clockwise ?? 1) * this.props.rotationSpeed
+      this.renderRotationState()
+    }
+  }
+
+  private initElement(svg: string, texturePath: string): HTMLElement {
+    // Créer l'élément HTML
+    const element = document.createElement('div');
+    element.classList.add('gear');
+    element.id = this.id
+
+    element.style.setProperty('--gear-texture', `url("${texturePath}")`);
+    element.style.setProperty('--gear-mask', `url('${svg}')`);
+
+    // Utiliser le SVG comme masque
+    element.style.mask = `url('${svg}') 0 0/${this.props.radius * 2}px ${this.props.radius * 2}px no-repeat`;
+    return element
+  }
+
+  static getGearById(id: string): Gear | undefined {
+    return Gear.gearsStore.find((gear) => gear.id === id);
+  }
+
+  static getGearByLabel(label: string): Gear | undefined {
+    return Gear.gearsStore.find((gear) => gear.label === label);
+  }
+
 
   // Mettre à jour les propriétés dynamiquement (position, vitesse, sens, etc.)
   public updateProps(newProps: Partial<VariableProps>) {
@@ -74,17 +106,19 @@ export class Gear {
     const totalDistance = this.getDist(this.props.position, destination)
     const innerCircumference = 2 * Math.PI * innerRadius;
     const totalRotations = totalDistance / innerCircumference;
-    const rotateOffset = totalRotations % 1
     const rotationSpeed = delay / (1000 * totalRotations)
 
     this.updateProps({ rotationSpeed })
     await this.transtalteTo(destination, delay)
-    this.updateProps({ rotationSpeed: 0, rotateState: this.props.clockwise ? rotateOffset * 360 : rotateOffset * -360 })
+    this.updateProps({ rotationSpeed: 0 })
   }
 
+  private renderRotationState() {
+    if (this.props.rotateState != null) this.element.style.rotate = `${this.props.rotateState}deg`
+  }
 
   private render() {
-    const { radius, rotationSpeed, clockwise, position, zIndex, rotateState } = this.props;
+    const { radius, position, zIndex } = this.props;
 
     // Appliquer les styles dynamiquement
     this.element.style.width = `${radius * 2}px`;
@@ -92,12 +126,11 @@ export class Gear {
     this.element.style.left = `${position.x}px`;
     this.element.style.top = `${position.y}px`;
     this.element.style.zIndex = `${zIndex}`
-    if (rotateState != null) this.element.style.rotate = `${rotateState}deg`
-    if (rotationSpeed) {
-      this.element.style.animation = `rotate ${rotationSpeed}s linear infinite`;
-      this.element.style.animationDirection = clockwise ? 'normal' : 'reverse';
-    } else {
-      this.element.style.animation = '';
-    }
+    this.renderRotationState()
+    //   this.element.style.animation = `rotate ${rotationSpeed}s linear infinite`;
+    //   this.element.style.animationDirection = clockwise ? 'normal' : 'reverse';
+    // } else {
+    //   this.element.style.animation = '';
+    // }
   }
 }

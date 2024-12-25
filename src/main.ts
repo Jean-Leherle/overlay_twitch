@@ -1,35 +1,37 @@
 import './style.css';
-import { Gear } from './component/gear';
-import texture1 from '/texture/copper.png'
+import { Gear } from './component/Gear';
+import texture1 from '/texture/copper.jpg'
+//import texture3 from '/texture/copper-shiny.avif'
+import texture4 from '/texture/copper-rusty.jpg'
+import { Component } from './component/Component';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 
-// Instancier un engrenage
-const gear1Component = new Gear(app, {
-  teeth: { number: 8, height: 20, width: 15 },
-  radius: 50,
-  position: { x: 50, y: 50 },
-  zIndex: 2,
-}, '/mask/gear1.svg', texture1);
-
-const gear2Component = new Gear(app, {
-  teeth: { number: 8, height: 0, width: 15 },
-  radius: 20,
-  position: { x: 100, y: 50 },
-  zIndex: 1,
-  clockwise: false,
-  rotationSpeed: 2
-}, '/mask/gear1.svg', texture1);
+const gear1 = new Gear(
+  app, {
+  radius: 100,
+  position: { x: 500, y: 500 },
+  visual: {
+    texturePath: texture1, maskPath: '/mask/gear1.svg'
+  }
+}
+)
 
 Promise.all([
   (async () => {
-    await gear1Component.transtalteTo({ x: 500, y: 200 }, 5000);
-    await gear1Component.transtalteTo({ x: 100, y: 50 }, 5000);
+    await gear1.mechanicalMoveTo({ x: 1500, y: 600 }, 5000);
+    await gear1.moveTo({ x: 1100, y: 400 }, 5000);
   })(),
-  gear2Component.moveTo({ x: gear2Component.props.position.x, y: gear2Component.props.position.y + 200 }, 3000)
+  (async () => {
+    gear1.rotationSpeed = 2;
+    await new Promise(resolve => setTimeout(resolve, 4000));
+    gear1.clockwise = -1;
+    await new Promise(resolve => setTimeout(resolve, 10000));
+    gear1.rotationSpeed = 0;
+  })(),
 ])
 
-console.log(gear1Component.getDist(gear1Component.props.position, { x: 53, y: 46 }))
+const rack1 = new Component(app, { size: { height: 100, width: 800 }, position: { x: 200, y: 700 }, visual: { maskPath: '/mask/rack.svg', texturePath: texture1 } })
 
 
 

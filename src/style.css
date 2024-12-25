@@ -1,17 +1,24 @@
-@keyframes rotate {
+/* @keyframes rotate {
   from {
     transform: rotate(0deg);
   }
   to {
     transform: rotate(360deg);
   }
+} */
+
+.component {
+  display: block;
+  position : absolute;
+  isolation: isolate;
+  background: var(--component-texture) repeat center;
+  
 }
 
 .gear {
   display: block;
   position : absolute;
   isolation: isolate;
-  background: var(--gear-shadow) no-repeat center;
+  background: var(--gear-texture) no-repeat center;
   
 }
-
