@@ -11,6 +11,7 @@ export function Rotatable<T extends new (...args: any[]) => Component>(Base: T) 
     public rotationSpeed: number = 0;
     public rotateState: number = 0;
     public clockwise: 1 | -1 = 1;
+    public totalTurns: number = 0
 
     public update(): void {
       super.update(); // Appelle `update()` de la classe de base
@@ -19,8 +20,11 @@ export function Rotatable<T extends new (...args: any[]) => Component>(Base: T) 
 
     public updateRotation(): void {
       if (this.rotationSpeed > 0) {
-        this.rotateState =
-          (this.rotateState + this.clockwise * this.rotationSpeed) % 360;
+        this.rotateState = (this.rotateState + this.clockwise * this.rotationSpeed);
+        if (this.rotateState > 360) {
+          this.rotateState %= 360;
+          this.totalTurns++
+        }
         this.parentElement.style.transform = `rotate(${this.rotateState}deg)`;
       }
     }

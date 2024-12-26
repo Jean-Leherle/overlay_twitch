@@ -8,14 +8,14 @@ export interface GearConfig {
   position: Position;
   zIndex: number
   visual: { texturePath: string; maskPath: string };
-  teeth?: { number: number; height: number };
+  teeth: { count: number; height: number };
 }
 
 const Base = Movable(Rotatable(Component)); // Combine les mixins
 
 export class Gear extends Base {
   public radius: number;
-  public teeth?: { number: number, height: number }
+  public teeth: { count: number, height: number }
 
   constructor(
     parent: HTMLElement,
@@ -40,15 +40,27 @@ export class Gear extends Base {
     this.applyTextureFilter()
   }
 
+  public get innerRadius(): number {
+    return this.radius * (1 - this.teeth.height / 100)
+  }
+
+  public get innerCircumference(): number {
+    return 2 * Math.PI * this.innerRadius
+  }
+
+  public get outerCircumference(): number {
+    return 2 * Math.PI * this.radius
+  }
+
+
   public async mechanicalMoveTo(destination: Position, delay: number): Promise<void> {
-    const height = this.teeth?.height ?? 0;
+
     // Rayon intérieur (distance sur laquelle la dent s'engage)
-    const innerRadius = this.radius * (1 - height / 100);
 
     // Distance totale à parcourir
     const totalDistance = this.getDist(this.position, destination)
-    const innerCircumference = 2 * Math.PI * innerRadius;
-    const totalRotations = totalDistance / innerCircumference;
+
+    const totalRotations = totalDistance / this.innerCircumference;
     this.rotationSpeed = delay / (1000 * totalRotations)
     await this.moveTo(destination, delay)
     this.rotationSpeed = 0
