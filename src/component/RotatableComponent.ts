@@ -24,9 +24,10 @@ export function Rotatable<T extends new (...args: any[]) => Component>(Base: T) 
         if (this.rotateState > 360) {
           this.rotateState %= 360;
           this.totalTurns++
+          this.totalTurns %= 1000
         }
-        this.parentElement.style.transform = `rotate(${this.rotateState}deg)`;
       }
+      this.parentElement.style.transform = `rotate(${this.rotateState}deg)`;
     }
   };
 }

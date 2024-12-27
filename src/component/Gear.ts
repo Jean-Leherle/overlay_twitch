@@ -41,7 +41,7 @@ export class Gear extends Base {
   }
 
   public get innerRadius(): number {
-    return this.radius * (1 - this.teeth.height / 100)
+    return this.radius * (1 - (this.teeth.height / 100))
   }
 
   public get innerCircumference(): number {
@@ -52,6 +52,13 @@ export class Gear extends Base {
     return 2 * Math.PI * this.radius
   }
 
+  public get center(): Position {
+    return { x: this.position.x + this.radius, y: this.position.y + this.radius }
+  }
+
+  public get angleByTeeth(): number {
+    return 360 / this.teeth.count
+  }
 
   public async mechanicalMoveTo(destination: Position, delay: number): Promise<void> {
 

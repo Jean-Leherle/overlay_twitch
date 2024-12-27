@@ -22,8 +22,18 @@
 
 .child-component {
   position: relative;
-  isolation: isolate;
+  /* isolation: isolate; */
   height: 100%;
   width: 100%;
   background: var(--component-texture) repeat center;
+}
+
+.component > .mask-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--background-color,black) repeat center;
+  z-index: -1; 
 }

@@ -2,13 +2,17 @@ import { Position } from "../types/Position";
 import { Size } from "../types/Size";
 import { v7 as uuid } from 'uuid'
 
+export type VisualConfig = {
+  texturePath: string,
+  maskPath: string,
+  color?: string
+
+}
 export type ComponentConfig = {
   size: Size,
   zIndex?: number
   position: Position,
-  visual: {
-    texturePath: string, maskPath: string
-  }
+  visual: VisualConfig
 }
 export class Component {
   public childElement: HTMLElement;
@@ -18,9 +22,8 @@ export class Component {
   public zIndex: number;
   public readonly UPDATEFRAME: number = 25;
   protected intervalId?: number;
-  protected visual: {
-    texturePath: string, maskPath: string
-  }
+  protected visual: VisualConfig
+  protected bgElement?: HTMLElement
 
   constructor(
     parent: HTMLElement,
@@ -36,6 +39,11 @@ export class Component {
     this.parentElement.id = generatedId
     this.childElement = this.initElement('child-component')
     this.parentElement.appendChild(this.childElement)
+    if (this.visual.color) {
+      this.bgElement = this.initElement('mask-layer')
+      this.parentElement.appendChild(this.bgElement)
+      this.applyBgColor()
+    }
     this.applyTextureAndMask()
     this.render(); // Applique les styles de position et de taille
     parent.appendChild(this.parentElement);
@@ -91,9 +99,15 @@ export class Component {
     this.parentElement.style.zIndex = String(this.zIndex)
     this.childElement.style.filter = `brightness(${this.zIndex}%) grayscale(${100 - this.zIndex}%)`
   }
-  public applyTextureAndMask(): void {
+  protected applyTextureAndMask(): void {
     this.childElement.style.setProperty("--component-texture", `url('${this.visual.texturePath}')`);
     this.childElement.style.mask = `url('${this.visual.maskPath}') center/cover repeat`;
     this.applyTextureFilter()
+  }
+  protected applyBgColor(): void {
+    if (this.visual.color && this.bgElement) {
+      this.bgElement.style.setProperty("--background-color", `${this.visual.color}`);
+      this.bgElement.style.mask = `url('${this.visual.maskPath.replace('.svg', '-bg.svg')}') center/cover repeat`;
+    }
   }
 }

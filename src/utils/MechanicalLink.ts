@@ -53,15 +53,9 @@ export class MechanicalLink<T extends Component, U extends Component> {
    * Fonction de lien : Relation entre deux engrenages.
    */
   static gearLink(source: Gear, target: Gear): void {
-    // Vérifier que les deux engrenages ont des dents
-    if (source.teeth && target.teeth) {
-      // Calculer la vitesse de rotation en fonction du ratio des dents
-      target.rotationSpeed =
-        -source.rotationSpeed * (target.teeth.count / source.teeth.count);
-    }
-    else {
-      target.rotationSpeed = - source.rotationSpeed * (target.radius / source.radius)
-    }
+    // Calculer la vitesse de rotation en fonction du ratio des dents
+    target.rotationSpeed = source.rotationSpeed * (source.teeth.count / target.teeth.count);
+    target.clockwise = (source.clockwise * -1) as 1 | -1
   }
 
   static rackGear(initialAngle: number, initialTurn: number = 0) {
@@ -73,7 +67,7 @@ export class MechanicalLink<T extends Component, U extends Component> {
       // Calcul du nombre de tours (positif ou négatif)
       const rotateState = gear.rotateState + INITIAL_ANGLE + (gear.totalTurns - initialTurn) * 360
 
-      const ANGLE_PER_TOOTH = 360 / gear.teeth.count; // Angle entre deux dents sur la crémaillère
+      const ANGLE_PER_TOOTH = gear.angleByTeeth; // Angle entre deux dents sur la crémaillère
       const closerIndiceTeeth = Math.round(rotateState / ANGLE_PER_TOOTH); // Calcul de la dent la plus proche
       const basePlacement = closerIndiceTeeth * TEETH_SPACING
       const interPlacement = (rotateState / ANGLE_PER_TOOTH - closerIndiceTeeth) * TEETH_SPACING
