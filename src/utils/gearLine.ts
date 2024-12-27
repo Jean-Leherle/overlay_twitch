@@ -73,7 +73,7 @@ export function createGearLine(config: GearLineConfig): Gear[] {
 
       if (contactAngle < 0) contactAngle += 360;
       const offsetToothAngle = (contactAngle - previousGear.rotateState) % previousGear.angleByTeeth
-      gear.rotateState = contactAngle + 180 + offsetToothAngle - gear.angleByTeeth / 2
+      gear.rotateState = contactAngle + 180 + gear.angleByTeeth * offsetToothAngle / previousGear.angleByTeeth - gear.angleByTeeth / 2
       // Vérification pour garder `rotateState` dans la plage [0, 360]
       gear.rotateState %= 360
       new MechanicalLink(previousGear, gear, MechanicalLink.gearLink);

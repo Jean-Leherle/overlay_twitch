@@ -60,7 +60,7 @@ function initializeDecorativeElements() {
         visual: { maskPath: '/mask/gear-basic-8.svg', texturePath: '/texture/copper.jpg' }
       },
       {
-        radius: { min: 40, max: 80 }, teeth: { count: 20, height: 4 },
+        radius: { min: 40, max: 80 }, teeth: { count: 20, height: 4.5 },
         visual: { maskPath: '/mask/gear-big-20.svg', texturePath: '/texture/copper.jpg' }
       }
     ]
