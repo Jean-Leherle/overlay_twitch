@@ -3,7 +3,7 @@ import { Component } from '../component/Component';
 import { Gear } from '../component/Gear';
 import '../style.css';
 import { createGearStructure } from '../utils/gearLine';
-import { centerTocontactGear, irregularRotate, setPerfectRotateState } from '../utils/gearUtils';
+import { irregularRotate, setPerfectRotateState } from '../utils/gearUtils';
 
 // Fonction principale pour initialiser l'overlay
 export function initWebcamOverlay(containerId: string) {
