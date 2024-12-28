@@ -37,3 +37,9 @@
   background: var(--background-color,black) repeat center;
   z-index: -1; 
 }
+
+.emote {
+  width: 24px;
+  height: 24px;
+  vertical-align: middle; /* Aligne l'emote avec le texte */
+}
