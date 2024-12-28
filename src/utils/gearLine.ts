@@ -1,7 +1,7 @@
 import { Gear } from '../component/Gear'; // Classe Gear
 import { VisualConfig } from '../component/Component';
 import { Position } from '../types/Position';
-import { setPerfectRotateState } from './gearUtils';
+import { centerTocontactGear, setPerfectRotateState } from './gearUtils';
 
 type GearBaseConfig = {
   radius: { min: number, max: number }
@@ -45,8 +45,7 @@ export function createGearLine(config: GearLineConfig & { orientation: 'left' | 
       const cMax = Math.min(position.y + width / 2, previousGear.center.y + previousGear.innerRadius + innerRadius);
       centerY = Math.random() * (cMax - cMin) + cMin;
 
-      const deltaX = Math.sqrt(Math.pow(previousGear.innerRadius + innerRadius, 2) - Math.pow(previousGear.center.y - centerY, 2));
-      centerX = orientation === 'right' ? previousGear.center.x + deltaX : previousGear.center.x - deltaX;
+      centerX = centerTocontactGear(previousGear, { innerRadius, fixedCenter: { y: centerY }, orientation });
       currentX = centerX + radius;
     } else {
       centerY = position.y;
@@ -100,8 +99,7 @@ export function createGearColumn(config: GearLineConfig & { orientation: 'up' | 
       const cMax = Math.min(position.x + width / 2, previousGear.center.x + previousGear.innerRadius + innerRadius);
       centerX = Math.random() * (cMax - cMin) + cMin;
 
-      const deltaY = Math.sqrt(Math.pow(previousGear.innerRadius + innerRadius, 2) - Math.pow(previousGear.center.x - centerX, 2));
-      centerY = orientation === 'down' ? previousGear.center.y + deltaY : previousGear.center.y - deltaY;
+      centerY = centerTocontactGear(previousGear, { innerRadius, fixedCenter: { x: centerX }, orientation });
       currentY = centerY + radius;
     } else {
       centerX = position.x;
