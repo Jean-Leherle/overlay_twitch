@@ -2,7 +2,7 @@
 import { Component } from '../component/Component';
 import { Gear } from '../component/Gear';
 import '../style.css';
-import { createGearColumn, createGearLine } from '../utils/gearLine';
+import { createGearStructure } from '../utils/gearLine';
 import { centerTocontactGear, irregularRotate, setPerfectRotateState } from '../utils/gearUtils';
 
 // Fonction principale pour initialiser l'overlay
@@ -31,37 +31,46 @@ function initializeDecorativeElements() {
   const gearsContainer = document.getElementById('decorative-gears');
   if (!gearsContainer) return;
 
-  // Exemple : Ajouter et animer un engrenage
+  const imageElement = document.createElement('img');
+  imageElement.src = '/image/overlayCam.png';
+  imageElement.alt = 'Overlay Cam';
+  imageElement.style.position = 'absolute';
+  imageElement.style.width = '1200px';
+  imageElement.style.height = '1200px';
+  imageElement.style.zIndex = '69';
+  gearsContainer.appendChild(imageElement);
+
+  // Création des engrenages et autres éléments décoratifs
 
 
   const cornerGearTL = new Gear(gearsContainer, {
     position: { x: 0, y: 0 },
     radius: 150,
-    teeth: { count: 30, height: 5 },
+    teeth: { count: 30, height: 2.5 },
     visual: { maskPath: '/mask/gear-big-30.svg', texturePath: '/texture/copper-shiny.avif' },
-    zIndex: 20
+    zIndex: 70
   })
   new Component(gearsContainer, {
     position: { x: cornerGearTL.radius - 40, y: cornerGearTL.radius - 40 },
     size: { height: 80, width: 80 },
     visual: { maskPath: '/mask/axe.svg', texturePath: '/texture/copper-rusty.jpg', color: 'black' },
-    zIndex: 50
+    zIndex: 70
   })
   cornerGearTL.rotateState = 40
 
-  const lineX: Gear[] = createGearLine({
+  const lineX: Gear[] = createGearStructure({
     distance: 500,
     parent: gearsContainer,
     position: { x: cornerGearTL.center.x + cornerGearTL.innerRadius, y: cornerGearTL.center.y },
-    width: 200,
+    width: 250,
     zIndex: 50,
     gearBases: [
       {
-        radius: { min: 25, max: 40 }, teeth: { count: 8, height: 10 },
+        radius: { min: 30, max: 40 }, teeth: { count: 8, height: 10 },
         visual: { maskPath: '/mask/gear-basic-8.svg', texturePath: '/texture/copper.jpg' }
       },
       {
-        radius: { min: 35, max: 60 }, teeth: { count: 20, height: 4.5 },
+        radius: { min: 60, max: 80 }, teeth: { count: 20, height: 4.5 },
         visual: { maskPath: '/mask/gear-big-20.svg', texturePath: '/texture/copper.jpg' }
       }
     ],
@@ -69,43 +78,25 @@ function initializeDecorativeElements() {
   })
   setPerfectRotateState(cornerGearTL, lineX[0])
 
-  const lineY: Gear[] = createGearColumn({
+  const lineY: Gear[] = createGearStructure({
     distance: 500,
     parent: gearsContainer,
     position: { x: cornerGearTL.center.x, y: cornerGearTL.center.y + cornerGearTL.innerRadius },
-    width: 150,
+    width: 200,
     zIndex: 50,
     gearBases: [
       {
-        radius: { min: 25, max: 40 }, teeth: { count: 8, height: 10 },
+        radius: { min: 40, max: 60 }, teeth: { count: 8, height: 10 },
         visual: { maskPath: '/mask/gear-basic-8.svg', texturePath: '/texture/copper.jpg' }
       },
       {
-        radius: { min: 45, max: 60 }, teeth: { count: 20, height: 4.5 },
+        radius: { min: 60, max: 80 }, teeth: { count: 20, height: 4.5 },
         visual: { maskPath: '/mask/gear-big-20.svg', texturePath: '/texture/copper.jpg' }
       }
     ],
     orientation: 'down'
   })
-  const cornerGearBLRadius = 150
-  const cornerGearBL = new Gear(gearsContainer, {
-    position: {
-      x: cornerGearTL.center.x - cornerGearBLRadius,
-      y: centerTocontactGear(lineY[lineY.length - 1], {
-        innerRadius: cornerGearBLRadius * 0.95,
-        fixedCenter: { x: cornerGearTL.center.x },
-        orientation: 'down'
-      }) - cornerGearBLRadius
-    },
-    radius: cornerGearBLRadius,
-    teeth: { count: 30, height: 5 },
-    visual: { maskPath: '/mask/gear-big-30.svg', texturePath: '/texture/copper-shiny.avif' },
-    zIndex: 40
-  })
-
-
   setPerfectRotateState(cornerGearTL, lineY[0])
-  setPerfectRotateState(lineY[lineY.length - 1], cornerGearBL)
   irregularRotate(cornerGearTL, {
     acceleration: 0.5,
     maxSpeed: 1,
@@ -113,4 +104,24 @@ function initializeDecorativeElements() {
     runningTime: 5000,
     waitingTime: 2000
   })
+
+  const smallLineX = createGearStructure({
+    parent: gearsContainer,
+    distance: 150,
+    position: { x: 780, y: 1100 },
+    width: 40,
+    zIndex: 80,
+    gearBases: [
+      {
+        radius: { min: 30, max: 40 }, teeth: { count: 8, height: 10 },
+        visual: { maskPath: '/mask/gear-big-30.svg', texturePath: '/texture/copper-clean.jpg' }
+      },
+      {
+        radius: { min: 20, max: 30 }, teeth: { count: 20, height: 4.5 },
+        visual: { maskPath: '/mask/gear-big-20.svg', texturePath: '/texture/copper-clean.jpg' }
+      }
+    ],
+    orientation: 'left',
+  })
+  smallLineX[0].rotationSpeed = 2
 }
