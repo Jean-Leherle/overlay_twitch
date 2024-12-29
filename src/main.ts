@@ -1,9 +1,9 @@
-import { initTchatOverlay } from './page/tchatOverlay';
+import { ChatOverlay } from './page/tchatOverlay';
 import { initWebcamOverlay } from './page/webCamOverlays';
 
 const routes: Record<string, () => void> = {
   '#webcam': () => initWebcamOverlay('app'),
-  '#tchat': () => initTchatOverlay('app'),
+  '#tchat': () => new ChatOverlay('app'),
   '#overlay': () => {
     const app = document.getElementById('app');
     if (app) app.innerHTML = '<div>Page Overlay Principale</div>';
