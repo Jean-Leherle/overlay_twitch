@@ -61,32 +61,33 @@
   background-position: center;
 }
 
+.machine {
+  background-image: url(/image/machine.png);
+  background-size: cover;
+  background-position: center;
+}
 
 /* Style pour le conteneur du message */
 .message-container {
-  position: relative;
-  width: 100%; /* Ajuster la largeur selon votre design */
-  height: 50px; /* Ajuster la hauteur du message */
+  position: absolute;
+  border-radius: 20px;
+  background-image: url(/texture/paper.jpg);
+  height: 200px; /* Ajuster la hauteur du message */
+  top : 850px;
+  left: 1050px;
   overflow: hidden;
   white-space: nowrap; /* Empêche le texte de se couper */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: end;
 }
 
 /* Style pour le texte du message qui défile */
 .message-text {
-  position: absolute;
-  opacity: 0;
-  animation: roll-out 5s forwards;
-}
-
-@keyframes roll-out {
-  0% {
-    transform: translateX(-100%); /* Commence à gauche, hors de l'écran */
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(100%); /* Se déplace à droite, hors de l'écran */
-    opacity: 1;
-  }
+  padding-right: 100px;
+  font-size: 40px;
+  font-family: 'Russo One', sans-serif;
 }
 
 .emote {

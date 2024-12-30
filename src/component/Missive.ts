@@ -19,12 +19,13 @@ export class Missive extends Base {
   public uuid: string = uuid()
   public parsedMessage: ParsedMessage;
   private coverTextElement: HTMLElement;
+  public static readonly SIZE: { width: number, height: number } = { width: 300, height: 100 }
 
   private state: "closed" | "opening" | "open" | "closing" = "closed"; // État de la missive
 
   constructor(parent: HTMLElement, config: MissiveConfig) {
 
-    super(parent, { ...config, visual: { maskPath: '', texturePath: '' }, size: { width: 300, height: 100 } });
+    super(parent, { ...config, visual: { maskPath: '', texturePath: '' }, size: Missive.SIZE });
     this.parsedMessage = config.message;
 
     // Initialiser l'élément texte
@@ -58,14 +59,12 @@ export class Missive extends Base {
   public async open(): Promise<void> {
     if (this.state !== "closed") return; // Si déjà ouvert ou en ouverture, ignorer
     this.state = "opening";
-    this.moveTo({ x: this.position.x + 200, y: this.position.y - 100 }, 12 * 45)
+    this.moveTo({ x: this.position.x + 140, y: this.position.y - 80 }, 12 * 45)
     // Rortation de 90°
     for (let i = 0; i <= 90; i += 2) {
       this.rotateState = i;
       //attendre 1s/90 = 11ms
       await new Promise(resolve => setTimeout(resolve, 12));
-      // Affiche uniquement le username
-      this.updateText();
     }
     this.rotateState = 90;
 
@@ -77,9 +76,8 @@ export class Missive extends Base {
   public async close(): Promise<void> {
     if (this.state !== "open") return; // Si déjà fermé, ignorer
     this.state = "closing";
-    await this.moveTo({ x: this.position.x, y: this.position.y + 400 }, 400)
+    await this.moveTo({ x: this.position.x, y: this.position.y + 300 }, 400)
     this.parentElement.innerHTML = ""
-    this.parentElement.dispatchEvent(new CustomEvent('missiveClosed', { detail: this, bubbles: true }));
     this.state = "closed";
   }
 
@@ -90,5 +88,6 @@ export class Missive extends Base {
     if (this.visual.maskPath.length === 0 && this.visual.texturePath.length === 0) {
       this.childElement.classList.add("missive-texture");  // Applique la classe CSS
     }
+    this.applyTextureFilter()
   }
 }
