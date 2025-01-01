@@ -1,6 +1,5 @@
 import { Position } from "../types/Position";
 import { Size } from "../types/Size";
-import { v7 as uuid } from 'uuid'
 
 export type VisualConfig = {
   texturePath: string,
@@ -21,7 +20,7 @@ export class Component {
   public size: Size;
   public zIndex: number;
   public readonly UPDATEFRAME: number = 25;
-  protected intervalId?: number;
+  protected intervalId?: NodeJS.Timeout;
   protected visual: VisualConfig
   protected bgElement?: HTMLElement
 
@@ -33,10 +32,7 @@ export class Component {
     this.size = config.size;
     this.visual = config.visual
     this.zIndex = config.zIndex ?? 0
-    const generatedId = uuid();
-
     this.parentElement = this.initElement();
-    this.parentElement.id = generatedId
     this.childElement = this.initElement('child-component')
     this.parentElement.appendChild(this.childElement)
     if (this.visual.color) {
