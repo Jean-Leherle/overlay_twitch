@@ -1,5 +1,6 @@
 import { Component } from '../component/Component';
 import { Gear } from '../component/Gear';
+import { SteamComponent } from '../component/steam';
 import '../style.css';
 import { createGearStructure } from '../utils/gearLine';
 import { irregularRotate, setPerfectRotateState } from '../utils/gearUtils';
@@ -62,6 +63,14 @@ export class WebcamOverlay {
       visual: { maskPath: '/mask/gear-big-30.svg', texturePath: '/texture/copper-shiny.avif' },
       zIndex: 70
     });
+
+    const steam = new SteamComponent(this.gearsContainer, {
+      position: { x: cornerGearTL.position.x + 300, y: cornerGearTL.position.y + 300 },
+      zIndex: 80,
+      rotateState: 40
+    })
+
+    setInterval(() => steam.play(), 10000);
 
     new Component(this.gearsContainer, {
       position: { x: cornerGearTL.radius - 40, y: cornerGearTL.radius - 40 },
