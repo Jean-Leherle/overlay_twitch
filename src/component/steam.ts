@@ -7,10 +7,13 @@ export interface SteamConfig {
   size?: { width: number, height: number };
   rotateState: number;
 }
+
 export class SteamComponent extends Component {
   private steamVideoElement: HTMLVideoElement;
-  constructor(parent: HTMLElement, config: SteamConfig) {
+  private playCount: number | null = null; // Nombre de lectures restantes (null pour boucle infinie)
+  private currentPlayCount: number = 0; // Compteur des lectures effectuées
 
+  constructor(parent: HTMLElement, config: SteamConfig) {
     super(parent,
       {
         size: config.size ?? { width: 200, height: 100 },
@@ -21,29 +24,60 @@ export class SteamComponent extends Component {
 
     this.parentElement.style.transform = `rotate(${config.rotateState}deg)`;
     this.parentElement.innerHTML = `
-    <canvas id="videoCanvas" width="500" height="300"></canvas>
-    <video id="videoSource" src="public/image/steam.mp4" muted playsinline></video>`
+      <canvas id="videoCanvas" width="500" height="300"></canvas>
+      <video id="videoSource" src="/image/steam.mp4" muted playsinline></video>`;
 
-    this.steamVideoElement = document.getElementById('videoSource') as HTMLVideoElement;
+    this.steamVideoElement = this.parentElement.querySelector('#videoSource') as HTMLVideoElement;
+
+    this.steamVideoElement.autoplay = false;
+
     this.formatVideo();
+
+    // Écoutez la fin de la vidéo pour gérer les lectures multiples
+    this.steamVideoElement.addEventListener('ended', this.handleVideoEnd.bind(this));
+
     document.addEventListener('play-steam', this.handlePlaySteam.bind(this) as EventListener);
   }
+
   public applyTextureAndMask(): void { }
 
-
   private handlePlaySteam(event: CustomEvent<number>): void {
-    if ((Math.random() * 10) >= event.detail) return;
-    this.play();
+    if (Math.random() * 10 >= event.detail) return;
+    this.play(Math.floor(Math.random() * 3) + 1);
+  }
+
+  private handleVideoEnd(): void {
+    if (this.playCount === null) {
+      // Lecture en boucle
+      this.steamVideoElement.play();
+    } else if (this.currentPlayCount < this.playCount - 1) {
+      // Lecture multiple
+      this.currentPlayCount++;
+      this.currentPlayCount %= 100;
+      this.steamVideoElement.play();
+    } else {
+      // Arrêter la lecture après le nombre défini
+      this.currentPlayCount = 0;
+    }
+  }
+
+  public play(playCount: number | null = null): void {
+    this.playCount = playCount;
+    this.currentPlayCount = 0;
+
+    // Réinitialiser la vidéo si elle est en pause ou terminée
+    if (this.steamVideoElement.paused || this.steamVideoElement.ended) {
+      this.steamVideoElement.currentTime = 0; // Remettre à zéro le temps de lecture
+      this.steamVideoElement.play(); // Relancer la lecture
+    }
   }
 
   private formatVideo(): void {
+    const canvas = this.parentElement.querySelector('#videoCanvas') as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-    const canvas = document.getElementById('videoCanvas') as HTMLCanvasElement;
-    const ctx = canvas.getContext('2d');
-
-    // Paramètres pour le chroma key (ajustez les tolérances selon votre vidéo)
     const green = { r: 0, g: 153, b: 0 }; // Couleur verte à supprimer
-    const tolerance = 80; // Tolérance pour détecter le vert
+    const tolerance = 80;
 
     this.steamVideoElement.addEventListener('play', () => {
       const drawFrame = () => {
@@ -52,32 +86,28 @@ export class SteamComponent extends Component {
           const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const length = frame.data.length;
 
+          // Traitement pour supprimer la couleur verte (par exemple)
           for (let i = 0; i < length; i += 4) {
             const r = frame.data[i];
             const g = frame.data[i + 1];
             const b = frame.data[i + 2];
 
-            // Si la couleur est proche du vert, rendre transparent
             if (
               Math.abs(r - green.r) < tolerance &&
               Math.abs(g - green.g) < tolerance &&
               Math.abs(b - green.b) < tolerance
             ) {
-              frame.data[i + 3] = 0; // Alpha à 0 (transparent)
+              frame.data[i + 3] = 0; // Rendre transparent
             }
           }
 
           ctx.putImageData(frame, 0, 0);
+
           requestAnimationFrame(drawFrame);
         }
       };
 
-      drawFrame();
+      drawFrame(); // Démarrer le dessin en boucle à chaque image de la vidéo
     });
   }
-  public play(): void {
-    this.steamVideoElement.play();
-  }
-
-
 }
