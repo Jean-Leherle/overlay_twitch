@@ -76,7 +76,7 @@ export class WebcamOverlay {
       rotateState: -40
     })
 
-    setInterval(() => { console.log('fume'); steam2.play(2) }, 11000);
+    setInterval(() => { steam2.play(2) }, 11000);
 
     new Component(this.gearsContainer, {
       position: { x: cornerGearTL.radius - 40, y: cornerGearTL.radius - 40 },
