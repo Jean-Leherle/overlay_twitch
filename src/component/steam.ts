@@ -61,14 +61,14 @@ export class SteamComponent extends Component {
     }
   }
 
-  public play(playCount: number | null = null): void {
+  public async play(playCount: number | null = null): Promise<void> {
     this.playCount = playCount;
     this.currentPlayCount = 0;
 
     // Réinitialiser la vidéo si elle est en pause ou terminée
     if (this.steamVideoElement.paused || this.steamVideoElement.ended) {
       this.steamVideoElement.currentTime = 0; // Remettre à zéro le temps de lecture
-      this.steamVideoElement.play(); // Relancer la lecture
+      await this.steamVideoElement.play(); // Relancer la lecture
     }
   }
 
@@ -77,7 +77,6 @@ export class SteamComponent extends Component {
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
     const green = { r: 0, g: 153, b: 0 }; // Couleur verte à supprimer
-    const tolerance = 80;
 
     this.steamVideoElement.addEventListener('play', () => {
       const drawFrame = () => {
@@ -93,17 +92,16 @@ export class SteamComponent extends Component {
             const b = frame.data[i + 2];
 
             if (
-              Math.abs(r - green.r) < tolerance &&
-              Math.abs(g - green.g) < tolerance &&
-              Math.abs(b - green.b) < tolerance
+              (r - green.r) < 20 &&
+              (g - green.g) < 20 &&
+              (b - green.b) < 20
             ) {
               frame.data[i + 3] = 0; // Rendre transparent
             }
           }
 
           ctx.putImageData(frame, 0, 0);
-
-          requestAnimationFrame(drawFrame);
+          setTimeout(() => requestAnimationFrame(drawFrame), 100);
         }
       };
 
