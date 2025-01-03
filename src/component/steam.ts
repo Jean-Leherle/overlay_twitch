@@ -41,8 +41,11 @@ export class SteamComponent extends Component {
 
   public applyTextureAndMask(): void { }
 
-  private handlePlaySteam(event: CustomEvent<number>): void {
-    if (Math.random() * 10 >= event.detail) return;
+  private handlePlaySteam(event: Event): void {
+    const customEvent = event as CustomEvent<number>;
+    console.log('play steam in steam');
+
+    if (Math.random() * 10 >= customEvent.detail) return;
     this.play(Math.floor(Math.random() * 3) + 1);
   }
 
@@ -101,7 +104,7 @@ export class SteamComponent extends Component {
           }
 
           ctx.putImageData(frame, 0, 0);
-          setTimeout(() => requestAnimationFrame(drawFrame), 100);
+          setTimeout(() => requestAnimationFrame(drawFrame), 80);
         }
       };
 

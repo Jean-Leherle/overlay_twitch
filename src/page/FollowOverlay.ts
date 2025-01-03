@@ -1,4 +1,5 @@
 import { Panel } from '../component/Panel';
+import { SteamComponent } from '../component/steam';
 import '../style.css';
 import { TwitchApiClient } from '../utils/followUtils';
 import { createGearStructure } from '../utils/gearLine';
@@ -8,7 +9,7 @@ export class FollowOverlay {
   private followContainer: HTMLElement | null = null;
   private panelElement: Panel | null = null;
   private twitchApiClient = new TwitchApiClient();
-
+  private steamElement: SteamComponent[] = [];
   // private followList: string[] = []; // Liste des utilisateurs qui suivent
 
   constructor(containerId: string) {
@@ -33,7 +34,6 @@ export class FollowOverlay {
     }
 
     const pageWidth = window.innerWidth;
-
     const lineX = createGearStructure({
       distance: pageWidth,
       parent: this.container!,
@@ -52,11 +52,35 @@ export class FollowOverlay {
       ],
       orientation: 'right'
     });
-    lineX[0].rotationSpeed = 0.5;
+    lineX[0].rotationSpeed = 0.2;
 
-
+    this.generateSteamOnCorner(pageWidth)
     this.startFollowDetection();
+
+    setInterval(() => {
+      const index = Math.floor(Math.random() * this.steamElement.length)
+      this.steamElement[index].play(1)
+    }, 10000)
   }
+
+  private async generateSteamOnCorner(pageWidth: number): Promise<void> {
+    this.steamElement.push(new SteamComponent(this.container!, {
+      size: { width: 300, height: 150 },
+      position: { x: 0, y: 100 },
+      zIndex: 100,
+      rotateState: 45
+    }
+    ))
+    this.steamElement.push(new SteamComponent(this.container!, {
+      size: { width: 300, height: 150 },
+      position: { x: pageWidth, y: 100 },
+      zIndex: 100,
+      rotateState: 315
+    }
+    ))
+  }
+
+
 
   private startFollowDetection(): void {
     const checkInterval = 1000; // Vérifie toutes les secondes
