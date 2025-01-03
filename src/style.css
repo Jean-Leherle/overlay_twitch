@@ -2,9 +2,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Russo+One&display=swap');
 
 #router {
+  font-size: 80px;
   a {
     text-decoration: none;
     color: #007bff;
+    
+    margin: 1em;
   }
   
   a:hover {
@@ -94,4 +97,33 @@
   width: 24px;
   height: 24px;
   vertical-align: middle; /* Aligne l'emote avec le texte */
+}
+
+#videoCanvas{
+  position: absolute;
+  height: 100%;
+  width: 100%;
+}
+#videoSource {
+  display: none;
+}
+
+
+.panel > .child-component{
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.panel-text {
+  font-family: 'Russo One', sans-serif;
+  font-size: 50px;
+  color : #0006;
+  padding: 5%;
+  text-shadow: 2px 2px 2px rgba(0,0,0,0.5),
+               -2px -2px 2px rgba(255,255,255,0.5),
+               4px 4px 4px rgba(0,0,0,0.3),
+               -4px -4px 4px rgba(255, 255, 255, 0.651);
+  max-width: fit-content;
+  text-align: center;
 }

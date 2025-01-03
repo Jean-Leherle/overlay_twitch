@@ -1,5 +1,6 @@
 import { Component } from '../component/Component';
 import { Gear } from '../component/Gear';
+import { SteamComponent } from '../component/steam';
 import '../style.css';
 import { createGearStructure } from '../utils/gearLine';
 import { irregularRotate, setPerfectRotateState } from '../utils/gearUtils';
@@ -15,10 +16,8 @@ export class WebcamOverlay {
       console.error(`Container avec l'ID '${containerId}' introuvable.`);
       return;
     }
-
     this.initialize();
   }
-
   private initialize(): void {
     this.render();
     this.gearsContainer = document.getElementById('decorative-gears');
@@ -62,6 +61,22 @@ export class WebcamOverlay {
       visual: { maskPath: '/mask/gear-big-30.svg', texturePath: '/texture/copper-shiny.avif' },
       zIndex: 70
     });
+
+    // const steam1 = new SteamComponent(this.gearsContainer, {
+    //   position: { x: cornerGearTL.position.x + 300, y: cornerGearTL.position.y + 300 },
+    //   zIndex: 80,
+    //   rotateState: 40
+    // })
+
+    // setInterval(() => steam1.play(3), 15000);
+
+    const steam2 = new SteamComponent(this.gearsContainer, {
+      position: { x: cornerGearTL.position.x + 700, y: cornerGearTL.position.y - 20 },
+      zIndex: 80,
+      rotateState: -40
+    })
+
+    setInterval(() => { steam2.play(2) }, 11000);
 
     new Component(this.gearsContainer, {
       position: { x: cornerGearTL.radius - 40, y: cornerGearTL.radius - 40 },

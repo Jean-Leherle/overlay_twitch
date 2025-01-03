@@ -2,6 +2,7 @@ import { Component } from '../component/Component';
 import { Gear } from '../component/Gear';
 import { Missive } from '../component/Missive';
 import { Movable } from '../component/MovableComponent';
+import { SteamComponent } from '../component/steam';
 import '../style.css';
 import { connectToTwitchChat } from "../utils/connectTchat";
 import { ParsedMessage } from '../utils/tchatUtils';
@@ -9,6 +10,7 @@ import { ParsedMessage } from '../utils/tchatUtils';
 export class ChatOverlay {
   private container: HTMLElement | null;
   private chatContainer: HTMLElement | null = null;
+  private steamElement: SteamComponent[] = [];
 
   private missiveList: Missive[] = [];
 
@@ -57,6 +59,19 @@ export class ChatOverlay {
         zIndex: 100
       })
     machineComponent.parentElement.classList.add('machine')
+    this.steamElement.push(new SteamComponent(machineComponent.parentElement, {
+      size: { width: 600, height: 300 },
+      position: { x: machineComponent.size.width / 16, y: -300 },
+      zIndex: 100,
+      rotateState: 270
+    }))
+
+    this.steamElement.push(new SteamComponent(machineComponent.parentElement, {
+      size: { width: 600, height: 300 },
+      position: { x: machineComponent.size.width - 150, y: 550 },
+      zIndex: 100,
+      rotateState: 40
+    }))
     this.fillbackSize()
   }
 
@@ -124,6 +139,8 @@ export class ChatOverlay {
       await new Promise(resolve => setTimeout(resolve, 25));
     }
     // Attendre la fin de l'animation pour supprimer le message
+    this.steamElement[0].play(1)
+    setTimeout(() => this.steamElement[1].play(1), 500)
     await new Promise(resolve => setTimeout(resolve, 2000)); // Attendre la durée de l'animation
 
     // Supprimer le message une fois l'animation terminée
@@ -150,7 +167,6 @@ export class ChatOverlay {
   private async handleNewMessage(parsedMessage: ParsedMessage): Promise<void> {
     if (!this.chatContainer) return;
 
-    console.log('New message:', parsedMessage);
     parsedMessage.username = parsedMessage.username.toUpperCase();
     const missive = new Missive(this.chatContainer,
       {
@@ -165,7 +181,6 @@ export class ChatOverlay {
 
   private initiMissiveTreatement() {
     setInterval(async () => {
-      console.log('ouverture de la missive');
       const firstMissive = this.missiveList[0]
       if (firstMissive && firstMissive.position.y === this.inputHeight) {
         await firstMissive.moveTo({ x: firstMissive.position.x + 400, y: firstMissive.position.y }, 400)
@@ -174,7 +189,7 @@ export class ChatOverlay {
         await firstMissive.moveTo({ x: firstMissive.position.x, y: firstMissive.position.y + 80 }, 400)
         firstMissive.open()
       }
-    }, 5000)
+    }, 4000)
   }
 
 
