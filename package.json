@@ -11,6 +11,12 @@
     "lint": "eslint 'src/**/*.{ts}'",
     "lint:fix": "eslint 'src/**/*.{ts}' --fix"
   },
+  "pkg": {
+    "assets": [
+      "dist/**/*",
+      "dist/index.html"
+    ]
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Jean-Leherle/overlay_twitch.git"
@@ -27,6 +33,8 @@
     "vite-svg-loader": "^5.1.0"
   },
   "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
     "uuid": "^11.0.3"
   }
 }

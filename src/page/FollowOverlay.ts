@@ -1,3 +1,4 @@
+import { Gear } from '../component/Gear';
 import { Panel } from '../component/Panel';
 import { SteamComponent } from '../component/steam';
 import '../style.css';
@@ -10,6 +11,9 @@ export class FollowOverlay {
   private panelElement: Panel | null = null;
   private twitchApiClient = new TwitchApiClient();
   private steamElement: SteamComponent[] = [];
+  private firstElement: Gear | null = null;
+  private pannelNumber: number = 0;
+  private readonly rotationSpeed: { base: number, max: number } = { base: 0.2, max: 2 }
   // private followList: string[] = []; // Liste des utilisateurs qui suivent
 
   constructor(containerId: string) {
@@ -52,7 +56,8 @@ export class FollowOverlay {
       ],
       orientation: 'right'
     });
-    lineX[0].rotationSpeed = 0.2;
+    this.firstElement = lineX[0]
+    this.firstElement.rotationSpeed = this.rotationSpeed.base;
 
     this.generateSteamOnCorner(pageWidth)
     this.startFollowDetection();
@@ -73,9 +78,9 @@ export class FollowOverlay {
     ))
     this.steamElement.push(new SteamComponent(this.container!, {
       size: { width: 300, height: 150 },
-      position: { x: pageWidth, y: 100 },
+      position: { x: pageWidth - 300, y: 100 },
       zIndex: 100,
-      rotateState: 315
+      rotateState: 115
     }
     ))
   }
@@ -119,6 +124,8 @@ export class FollowOverlay {
   }
 
   private handleNewFollow = async (username: string): Promise<void> => {
+    if (this.firstElement) this.firstElement.rotationSpeed = this.rotationSpeed.max;
+    this.pannelNumber++;
     this.panelElement = this.panelElement ?? new Panel(this.followContainer!, {
       position: { x: this.container?.clientWidth ?? 1000, y: 0 },
       zIndex: 100,
@@ -126,10 +133,15 @@ export class FollowOverlay {
     const clientWidth = this.container?.clientWidth ?? 1000;
 
     this.panelElement.updateText(`Bienvenue ${username}`);
-
     await this.panelElement.moveTo({ x: (clientWidth - Panel.SIZE.width) / 2, y: 0 }, 5000)
     await new Promise(resolve => setTimeout(resolve, 2000));
     await this.panelElement.moveTo({ x: -Panel.SIZE.width, y: 0 }, 5000)
+
+    this.pannelNumber--;
+    if (this.pannelNumber === 0) {
+      if (this.firstElement) this.firstElement.rotationSpeed = this.rotationSpeed.base;
+    }
+
   }
 
 
