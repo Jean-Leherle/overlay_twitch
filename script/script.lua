@@ -1,7 +1,7 @@
 obs = obslua
 
 -- Chemin vers le dossier contenant server.exe (à remplacer par le bon chemin)
-local base_path = "C:/Users/louis/Documents/test" 
+local base_path = "C:/Users/louis/Documents/overlay" 
 -- Nom de l'exécutable (ne pas modifier)
 local server_exe = "/server.exe"
 
