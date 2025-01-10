@@ -92,7 +92,7 @@ export class WebcamOverlay {
       distance: 500,
       parent: this.gearsContainer,
       position: { x: cornerGearTL.center.x + cornerGearTL.innerRadius, y: cornerGearTL.center.y },
-      width: 250,
+      width: 200,
       zIndex: 50,
       gearBases: [
         {
