@@ -60,15 +60,16 @@ export class FollowOverlay {
     this.firstElement.rotationSpeed = this.rotationSpeed.base;
 
     this.generateSteamOnCorner(pageWidth)
+    this.generateSteamOnBorder()
     this.startFollowDetection();
 
     setInterval(() => {
       const index = Math.floor(Math.random() * this.steamElement.length)
       this.steamElement[index].play(1)
-    }, 10000)
+    }, 15000 / this.steamElement.length)
   }
 
-  private async generateSteamOnCorner(pageWidth: number): Promise<void> {
+  private generateSteamOnCorner(pageWidth: number): void {
     this.steamElement.push(new SteamComponent(this.container!, {
       size: { width: 300, height: 150 },
       position: { x: 0, y: 100 },
@@ -85,6 +86,39 @@ export class FollowOverlay {
     ))
   }
 
+  private generateSteamOnBorder(): void {
+    const pageHeight = window.innerHeight;
+    const pageWidth = window.innerWidth
+    const spacing = 600;
+    const numberOfSteams = Math.floor(pageHeight / spacing);
+
+    console.log({ numberOfSteams, pageHeight, spacing });
+
+
+    for (let i = 0; i < numberOfSteams; i++) {
+      const randomOffset = Math.random() * 100 - 50; // Random offset between -50 and 50
+      const yPosition = (i + 1) * spacing + Math.round(randomOffset);
+
+      this.steamElement.push(new SteamComponent(this.container!, {
+        size: { width: 300, height: 150 },
+        position: { x: 0, y: yPosition },
+        zIndex: 100,
+        rotateState: (360 - 45) + Math.round(Math.random() * 90) % 360
+      }));
+    }
+
+    for (let i = 0; i < numberOfSteams; i++) {
+      const randomOffset = Math.random() * 100 - 50; // Random offset between -50 and 50
+      const yPosition = (i + 1) * spacing + Math.round(randomOffset);
+
+      this.steamElement.push(new SteamComponent(this.container!, {
+        size: { width: 300, height: 150 },
+        position: { x: pageWidth - 300, y: yPosition },
+        zIndex: 100,
+        rotateState: (180 - 45) + Math.round(Math.random() * 90) % 360
+      }));
+    }
+  }
 
 
   private startFollowDetection(): void {
@@ -114,26 +148,28 @@ export class FollowOverlay {
       const followedAt = new Date(follow.followedAt);
       const diffInSeconds = (now.getTime() - followedAt.getTime()) / 1000;
 
-      return diffInSeconds <= 10; // Filtre ceux qui ont suivi dans les 10 dernières secondes
+      return diffInSeconds <= 10;
     });
 
     for (const follower of recentFollowers) {
-      this.handleNewFollow(follower.username); // Appelez votre fonction existante ici
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      this.handleNewFollow(follower.username);
+      await new Promise(resolve => setTimeout(resolve, 2000))
     };
   }
 
   private handleNewFollow = async (username: string): Promise<void> => {
     if (this.firstElement) this.firstElement.rotationSpeed = this.rotationSpeed.max;
     this.pannelNumber++;
-    this.panelElement = this.panelElement ?? new Panel(this.followContainer!, {
+    this.panelElement = new Panel(this.followContainer!, {
       position: { x: this.container?.clientWidth ?? 1000, y: 0 },
       zIndex: 100,
     });
     const clientWidth = this.container?.clientWidth ?? 1000;
 
     this.panelElement.updateText(`Bienvenue ${username}`);
+    this.panelElement
     await this.panelElement.moveTo({ x: (clientWidth - Panel.SIZE.width) / 2, y: 0 }, 5000)
+    this.steamElement.forEach(el => el.play(2))
     await new Promise(resolve => setTimeout(resolve, 2000));
     await this.panelElement.moveTo({ x: -Panel.SIZE.width, y: 0 }, 5000)
 

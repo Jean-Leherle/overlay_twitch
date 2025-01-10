@@ -102,8 +102,6 @@ export class ChatOverlay {
     })
     gear1.rotationSpeed = 3
     gear1.clockwise = -1
-
-
   }
 
 

@@ -9,106 +9,146 @@ export interface SteamConfig {
 }
 
 export class SteamComponent extends Component {
-  private steamVideoElement: HTMLVideoElement;
+  private static preformattedFrames: ImageData[] | null = null; // Frames préformatées (partagées)
+  private static preformatPromise: Promise<ImageData[]> | null = null; // Promesse pour éviter un préformatage multiple
+  private static delay: number = 80; // Délai entre chaque frame en ms
+
+  private canvaElement: HTMLCanvasElement;
   private playCount: number | null = null; // Nombre de lectures restantes (null pour boucle infinie)
   private currentPlayCount: number = 0; // Compteur des lectures effectuées
+  private isPlaying: boolean = false;
+
 
   constructor(parent: HTMLElement, config: SteamConfig) {
-    super(parent,
-      {
-        size: config.size ?? { width: 200, height: 100 },
-        position: { x: config.position.x, y: config.position.y },
-        visual: { maskPath: '', texturePath: '' },
-        zIndex: config.zIndex ?? 100,
-      });
+    super(parent, {
+      size: config.size ?? { width: 200, height: 100 },
+      position: { x: config.position.x, y: config.position.y },
+      visual: { maskPath: "", texturePath: "" },
+      zIndex: config.zIndex ?? 100,
+    });
 
     this.parentElement.style.transform = `rotate(${config.rotateState}deg)`;
     this.parentElement.innerHTML = `
       <canvas id="videoCanvas" width="500" height="300"></canvas>
       <video id="videoSource" src="/image/steam.mp4" muted playsinline></video>`;
 
-    this.steamVideoElement = this.parentElement.querySelector('#videoSource') as HTMLVideoElement;
+    this.canvaElement = this.parentElement.querySelector("#videoCanvas") as HTMLCanvasElement;
 
-    this.steamVideoElement.autoplay = false;
+    // Initier le préformatage si ce n'est pas déjà fait
+    if (!SteamComponent.preformattedFrames && !SteamComponent.preformatPromise) {
+      const steamVideoElement = this.parentElement.querySelector("#videoSource") as HTMLVideoElement;
+      steamVideoElement.pause();
+      steamVideoElement.autoplay = false;
 
-    this.formatVideo();
+      SteamComponent.preformatPromise = new Promise((resolve) => {
+        steamVideoElement.addEventListener("loadeddata", async () => {
+          SteamComponent.preformattedFrames = await SteamComponent.preFormatVideo(
+            steamVideoElement
+          );
 
-    // Écoutez la fin de la vidéo pour gérer les lectures multiples
-    this.steamVideoElement.addEventListener('ended', this.handleVideoEnd.bind(this));
-
-    document.addEventListener('play-steam', this.handlePlaySteam.bind(this) as EventListener);
-  }
-
-  public applyTextureAndMask(): void { }
-
-  private handlePlaySteam(event: Event): void {
-    const customEvent = event as CustomEvent<number>;
-    console.log('play steam in steam');
-
-    if (Math.random() * 10 >= customEvent.detail) return;
-    this.play(Math.floor(Math.random() * 3) + 1);
-  }
-
-  private handleVideoEnd(): void {
-    if (this.playCount === null) {
-      // Lecture en boucle
-      this.steamVideoElement.play();
-    } else if (this.currentPlayCount < this.playCount - 1) {
-      // Lecture multiple
-      this.currentPlayCount++;
-      this.currentPlayCount %= 100;
-      this.steamVideoElement.play();
-    } else {
-      // Arrêter la lecture après le nombre défini
-      this.currentPlayCount = 0;
+          resolve(SteamComponent.preformattedFrames);
+        });
+      });
     }
   }
 
-  public async play(playCount: number | null = null): Promise<void> {
-    this.playCount = playCount;
-    this.currentPlayCount = 0;
+  public static async preFormatVideo(video: HTMLVideoElement): Promise<ImageData[]> {
+    const frames: ImageData[] = [];
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
 
-    // Réinitialiser la vidéo si elle est en pause ou terminée
-    if (this.steamVideoElement.paused || this.steamVideoElement.ended) {
-      this.steamVideoElement.currentTime = 0; // Remettre à zéro le temps de lecture
-      await this.steamVideoElement.play(); // Relancer la lecture
+    if (!ctx) {
+      console.error("Impossible de créer un contexte pour le canvas");
+      return frames;
     }
-  }
 
-  private formatVideo(): void {
-    const canvas = this.parentElement.querySelector('#videoCanvas') as HTMLCanvasElement;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    // Configure le canvas à la taille de la vidéo
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
 
     const green = { r: 0, g: 153, b: 0 }; // Couleur verte à supprimer
 
-    this.steamVideoElement.addEventListener('play', () => {
-      const drawFrame = () => {
-        if (!this.steamVideoElement.ended && ctx) {
-          ctx.drawImage(this.steamVideoElement, 0, 0, canvas.width, canvas.height);
-          const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const length = frame.data.length;
+    return new Promise((resolve) => {
+      const captureFrame = () => {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-          // Traitement pour supprimer la couleur verte (par exemple)
-          for (let i = 0; i < length; i += 4) {
-            const r = frame.data[i];
-            const g = frame.data[i + 1];
-            const b = frame.data[i + 2];
+        // Supprime la couleur verte
+        for (let i = 0; i < frame.data.length; i += 4) {
+          const r = frame.data[i];
+          const g = frame.data[i + 1];
+          const b = frame.data[i + 2];
 
-            if (
-              (r - green.r) < 20 &&
-              (g - green.g) < 20 &&
-              (b - green.b) < 20
-            ) {
-              frame.data[i + 3] = 0; // Rendre transparent
-            }
+          if (
+            Math.abs(r - green.r) < 40 &&
+            Math.abs(g - green.g) < 40 &&
+            Math.abs(b - green.b) < 40
+          ) {
+            frame.data[i + 3] = 0; // Rend le pixel transparent
           }
+        }
 
-          ctx.putImageData(frame, 0, 0);
-          setTimeout(() => requestAnimationFrame(drawFrame), 80);
+        frames.push(frame);
+
+        if (video.currentTime < video.duration) {
+          video.currentTime += SteamComponent.delay / 1000; // Avance de quelques ms
+        } else {
+          resolve(frames);
         }
       };
 
-      drawFrame(); // Démarrer le dessin en boucle à chaque image de la vidéo
+      video.addEventListener("seeked", captureFrame);
+      video.currentTime = 0; // Démarre au début
     });
+
+  }
+
+  public async play(playCount: number | null = null): Promise<void> {
+    if (this.isPlaying) {
+      return; // Empêche de lancer une nouvelle lecture
+    }
+
+    this.isPlaying = true; // Indique qu'une lecture est en cours
+
+    // Attendre la fin du préformatage si nécessaire
+    if (!SteamComponent.preformattedFrames) {
+      await SteamComponent.preformatPromise;
+    }
+
+    // Vérifie si les frames sont disponibles
+    if (!SteamComponent.preformattedFrames || SteamComponent.preformattedFrames.length === 0) {
+      console.error("Les frames préformatées ne sont pas disponibles.");
+      this.isPlaying = false; // Réinitialise l'état en cas d'erreur
+      return;
+    }
+
+    // Ajuster les dimensions du canvas avant d'afficher les frames
+    const frameWidth = SteamComponent.preformattedFrames[0].width;
+    const frameHeight = SteamComponent.preformattedFrames[0].height;
+    this.canvaElement.width = frameWidth;
+    this.canvaElement.height = frameHeight;
+
+    this.playCount = playCount ?? 1;
+    this.currentPlayCount = 0;
+
+    while (this.playCount === null || this.currentPlayCount < this.playCount) {
+      for (const frame of SteamComponent.preformattedFrames) {
+        const promise = new Promise((resolve) =>
+          setTimeout(resolve, SteamComponent.delay)
+        );
+        const ctx = this.canvaElement.getContext("2d");
+        if (!ctx) {
+          console.error("Contexte du canvas non trouvé.");
+          this.isPlaying = false; // Réinitialise l'état en cas d'erreur
+          return;
+        }
+
+        ctx.putImageData(frame, 0, 0);
+        await promise;
+      }
+      this.currentPlayCount++;
+    }
+
+    this.isPlaying = false; // Réinitialise l'état après la fin de la lecture
   }
 }
