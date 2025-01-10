@@ -11,6 +11,7 @@ export class ChatOverlay {
   private container: HTMLElement | null;
   private chatContainer: HTMLElement | null = null;
   private steamElement: SteamComponent[] = [];
+  private machineDisplay: HTMLElement | null = null
 
   private missiveList: Missive[] = [];
 
@@ -72,6 +73,11 @@ export class ChatOverlay {
       zIndex: 100,
       rotateState: 40
     }))
+
+    this.machineDisplay = document.createElement('div');
+    machineComponent.childElement.appendChild(this.machineDisplay);
+    this.machineDisplay.classList.add('machine_display')
+    this.machineDisplay.innerText = ''
     this.fillbackSize()
   }
 
@@ -110,9 +116,20 @@ export class ChatOverlay {
     if (!this.chatContainer) return;
     this.chatContainer.addEventListener('missiveOpened', async (event) => {
       const missive = (event as CustomEvent).detail as Missive;
+
       await this.showMessage(missive.parsedMessage.message)
       missive.close()
+      this.machineDisplay!.innerText = ''
     });
+  }
+
+  private async showNameOnDisplay(name: string): Promise<void> {
+    if (!this.machineDisplay) return
+    this.machineDisplay.innerText = ''
+    for (const letter of name) {
+      this.machineDisplay.innerText += letter;
+      await new Promise(resolve => setTimeout(resolve, 150))
+    }
   }
 
   private async showMessage(message: string): Promise<void> {
@@ -184,6 +201,7 @@ export class ChatOverlay {
         await firstMissive.moveTo({ x: firstMissive.position.x + 400, y: firstMissive.position.y }, 400)
         this.missiveList.shift()
         this.allGoDown()
+        this.showNameOnDisplay(firstMissive.parsedMessage.username)
         await firstMissive.moveTo({ x: firstMissive.position.x, y: firstMissive.position.y + 80 }, 400)
         firstMissive.open()
       }

@@ -97,7 +97,7 @@ export class Component {
   }
   protected applyTextureAndMask(): void {
     this.childElement.style.setProperty("--component-texture", `url('${this.visual.texturePath}')`);
-    this.childElement.style.mask = `url('${this.visual.maskPath}') center/cover repeat`;
+    if (this.visual.maskPath !== '') this.childElement.style.mask = `url('${this.visual.maskPath}') center/cover repeat`;
     this.applyTextureFilter()
   }
   protected applyBgColor(): void {
