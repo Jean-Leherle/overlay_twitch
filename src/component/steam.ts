@@ -2,22 +2,17 @@ import { Position } from "../types/Position";
 import { Component } from "./Component";
 
 export interface SteamConfig {
-  position: Position; // Position de la missive
+  position: Position; // Position de la vapeur
   zIndex?: number; // Index z pour la hiérarchie visuelle
-  size?: { width: number, height: number };
+  size?: { width: number; height: number };
   rotateState: number;
 }
 
 export class SteamComponent extends Component {
-  private static preformattedFrames: ImageData[] | null = null; // Frames préformatées (partagées)
-  private static preformatPromise: Promise<ImageData[]> | null = null; // Promesse pour éviter un préformatage multiple
-  private static delay: number = 80; // Délai entre chaque frame en ms
-
-  private canvaElement: HTMLCanvasElement;
-  private playCount: number | null = null; // Nombre de lectures restantes (null pour boucle infinie)
+  private videoElement: HTMLVideoElement;
+  private playCount: number | null = null; // Nombre de lectures à effectuer (null = boucle infinie)
   private currentPlayCount: number = 0; // Compteur des lectures effectuées
-  private isPlaying: boolean = false;
-
+  private isPlaying: boolean = false; // Indique si une lecture est en cours
 
   constructor(parent: HTMLElement, config: SteamConfig) {
     super(parent, {
@@ -27,128 +22,56 @@ export class SteamComponent extends Component {
       zIndex: config.zIndex ?? 100,
     });
 
+    // Appliquer la rotation à l'élément parent
     this.parentElement.style.transform = `rotate(${config.rotateState}deg)`;
+
+    // Insérer l'élément vidéo directement dans le DOM
     this.parentElement.innerHTML = `
-      <canvas id="videoCanvas" width="500" height="300"></canvas>
-      <video id="videoSource" src="/image/steam.mp4" muted playsinline></video>`;
+      <video
+        src="/image/steam.webm"
+        muted
+        playsinline
+        preload="auto"
+      ></video>
+    `;
 
-    this.canvaElement = this.parentElement.querySelector("#videoCanvas") as HTMLCanvasElement;
+    this.videoElement = this.parentElement.querySelector("video") as HTMLVideoElement;
 
-    // Initier le préformatage si ce n'est pas déjà fait
-    if (!SteamComponent.preformattedFrames && !SteamComponent.preformatPromise) {
-      const steamVideoElement = this.parentElement.querySelector("#videoSource") as HTMLVideoElement;
-      steamVideoElement.pause();
-      steamVideoElement.autoplay = false;
-
-      SteamComponent.preformatPromise = new Promise((resolve) => {
-        steamVideoElement.addEventListener("loadeddata", async () => {
-          SteamComponent.preformattedFrames = await SteamComponent.preFormatVideo(
-            steamVideoElement
-          );
-
-          resolve(SteamComponent.preformattedFrames);
-        });
-      });
+    // Ajuster la taille de l'élément parent en fonction des dimensions configurées
+    if (config.size) {
+      this.parentElement.style.width = `${config.size.width}px`;
+      this.parentElement.style.height = `${config.size.height}px`;
     }
+    this.videoElement.addEventListener("ended", () => this.handleVideoEnd());
   }
 
-  public static async preFormatVideo(video: HTMLVideoElement): Promise<ImageData[]> {
-    const frames: ImageData[] = [];
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  public play(playCount: number | null = null): void {
+    console.log('play ');
 
-    if (!ctx) {
-      console.error("Impossible de créer un contexte pour le canvas");
-      return frames;
-    }
-
-    // Configure le canvas à la taille de la vidéo
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    const green = { r: 0, g: 153, b: 0 }; // Couleur verte à supprimer
-
-    return new Promise((resolve) => {
-      const captureFrame = () => {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-        // Supprime la couleur verte
-        for (let i = 0; i < frame.data.length; i += 4) {
-          const r = frame.data[i];
-          const g = frame.data[i + 1];
-          const b = frame.data[i + 2];
-
-          if (
-            Math.abs(r - green.r) < 40 &&
-            Math.abs(g - green.g) < 40 &&
-            Math.abs(b - green.b) < 40
-          ) {
-            frame.data[i + 3] = 0; // Rend le pixel transparent
-          }
-        }
-
-        frames.push(frame);
-
-        if (video.currentTime < video.duration) {
-          video.currentTime += SteamComponent.delay / 1000; // Avance de quelques ms
-        } else {
-          resolve(frames);
-        }
-      };
-
-      video.addEventListener("seeked", captureFrame);
-      video.currentTime = 0; // Démarre au début
-    });
-
-  }
-
-  public async play(playCount: number | null = null): Promise<void> {
     if (this.isPlaying) {
-      return; // Empêche de lancer une nouvelle lecture
+      return; // Empêche de relancer si déjà en lecture
     }
 
-    this.isPlaying = true; // Indique qu'une lecture est en cours
-
-    // Attendre la fin du préformatage si nécessaire
-    if (!SteamComponent.preformattedFrames) {
-      await SteamComponent.preformatPromise;
-    }
-
-    // Vérifie si les frames sont disponibles
-    if (!SteamComponent.preformattedFrames || SteamComponent.preformattedFrames.length === 0) {
-      console.error("Les frames préformatées ne sont pas disponibles.");
-      this.isPlaying = false; // Réinitialise l'état en cas d'erreur
-      return;
-    }
-
-    // Ajuster les dimensions du canvas avant d'afficher les frames
-    const frameWidth = SteamComponent.preformattedFrames[0].width;
-    const frameHeight = SteamComponent.preformattedFrames[0].height;
-    this.canvaElement.width = frameWidth;
-    this.canvaElement.height = frameHeight;
-
-    this.playCount = playCount ?? 1;
+    this.playCount = playCount;
     this.currentPlayCount = 0;
+    this.isPlaying = true;
 
-    while (this.playCount === null || this.currentPlayCount < this.playCount) {
-      for (const frame of SteamComponent.preformattedFrames) {
-        const promise = new Promise((resolve) =>
-          setTimeout(resolve, SteamComponent.delay)
-        );
-        const ctx = this.canvaElement.getContext("2d");
-        if (!ctx) {
-          console.error("Contexte du canvas non trouvé.");
-          this.isPlaying = false; // Réinitialise l'état en cas d'erreur
-          return;
-        }
+    this.videoElement.loop = false; // Désactiver la boucle native
+    this.videoElement.play(); // Démarrer la lecture
+  }
 
-        ctx.putImageData(frame, 0, 0);
-        await promise;
-      }
-      this.currentPlayCount++;
+  public pause(): void {
+    this.videoElement.pause();
+  }
+
+  private handleVideoEnd(): void {
+    this.currentPlayCount++;
+
+    if (this.playCount === null || this.currentPlayCount < this.playCount) {
+      this.videoElement.currentTime = 0; // Revenir au début
+      this.videoElement.play(); // Redémarrer
+    } else {
+      this.isPlaying = false; // Lecture terminée
     }
-
-    this.isPlaying = false; // Réinitialise l'état après la fin de la lecture
   }
 }
