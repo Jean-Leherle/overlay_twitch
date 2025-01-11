@@ -19,7 +19,7 @@ export class Component {
   public position: Position;
   public size: Size;
   public zIndex: number;
-  public readonly UPDATEFRAME: number = 30;
+  public readonly UPDATEFRAME: number = 50;
   protected intervalId?: NodeJS.Timeout;
   protected visual: VisualConfig
   protected bgElement?: HTMLElement

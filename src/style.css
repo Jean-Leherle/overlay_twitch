@@ -74,15 +74,21 @@
 
 .machine_display{
   position: relative;
-  top:284px;
-  left : 130px;
-  width: 240px;
+  top:255px;
+  left : 121px;
+  width: 260px;
+  height: 70px;
   font-family: "Fira Mono", serif;
   text-align: center;
   color: rgb(32, 189, 32);
-  font-size: 20px;
+  font-size: 30px;
   font-weight: 500;
-  text-shadow: 0 0 10px rgb(32, 255, 32); /* Lueur plus forte */
+  text-shadow: 0 0 18px rgb(32, 255, 32); /* Lueur plus forte */
+  text-overflow: clip;
+  text-wrap: balance;
+  word-break: break-all;
+  overflow: hidden;
+  align-content: center;
   }
 
 /* Style pour le conteneur du message */
@@ -104,7 +110,7 @@
 /* Style pour le texte du message qui défile */
 .message-text {
   padding-right: 100px;
-  font-size: 40px;
+  font-size: 100px;
   font-family: "Fira Mono", serif;
   letter-spacing: -1px;
 }

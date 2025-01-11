@@ -76,8 +76,9 @@ export class Missive extends Base {
   public async close(): Promise<void> {
     if (this.state !== "open") return; // Si déjà fermé, ignorer
     this.state = "closing";
-    await this.moveTo({ x: this.position.x, y: this.position.y + 300 }, 400)
-    this.parentElement.innerHTML = ""
+    await this.moveTo({ x: this.position.x, y: this.position.y + 300 }, 400);
+    this.parentElement.innerHTML = "";
+    this.stopRealTimeUpdate();
     this.state = "closed";
   }
 
@@ -88,6 +89,6 @@ export class Missive extends Base {
     if (this.visual.maskPath.length === 0 && this.visual.texturePath.length === 0) {
       this.childElement.classList.add("missive-texture");  // Applique la classe CSS
     }
-    this.applyTextureFilter()
+    this.applyTextureFilter();
   }
 }

@@ -92,9 +92,6 @@ export class FollowOverlay {
     const spacing = 600;
     const numberOfSteams = Math.floor(pageHeight / spacing);
 
-    console.log({ numberOfSteams, pageHeight, spacing });
-
-
     for (let i = 0; i < numberOfSteams; i++) {
       const randomOffset = Math.random() * 100 - 50; // Random offset between -50 and 50
       const yPosition = (i + 1) * spacing + Math.round(randomOffset);
