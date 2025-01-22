@@ -5,10 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:host": "vite --host",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint 'src/**/*.{ts}'",
     "lint:fix": "eslint 'src/**/*.{ts}' --fix"
+  },
+  "pkg": {
+    "assets": [
+      "dist/**/*",
+      "dist/index.html"
+    ]
   },
   "repository": {
     "type": "git",
@@ -24,5 +31,10 @@
     "typescript": "~5.6.2",
     "vite": "^6.0.3",
     "vite-svg-loader": "^5.1.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "uuid": "^11.0.3"
   }
 }

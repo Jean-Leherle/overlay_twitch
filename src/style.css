@@ -1,16 +1,169 @@
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
+
+@import url('https://fonts.googleapis.com/css2?family=Russo+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;500;700&display=swap');
+
+#router {
+  font-size: 80px;
+  a {
+    text-decoration: none;
+    color: #007bff;
+    
+    margin: 1em;
   }
-  to {
-    transform: rotate(360deg);
+  
+  a:hover {
+    text-decoration: underline;
+    color: #0056b3;
+  }
+  
+  div {
+    font-family: "Fira Mono", serif;
+    padding: 20px;
+    line-height: 1.6;
   }
 }
 
-.gear {
-  display: block; /* Assure que l'élément est visible */
-  background-repeat: no-repeat; /* Supprime les répétitions */
-  background-size: contain; /* Ajuste la taille du SVG à l'élément */
-  background-position: center; /* Centre l'image */
-  border: 1px solid #ccc; /* Ligne pour visualiser la bordure */
+.component {
+  position: absolute;  
 }
+
+.child-component {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  background: var(--component-texture) repeat center;
+}
+
+.component > .mask-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--background-color, black) repeat center;
+  z-index: -1; 
+}
+
+/* Styling pour le texte de la missive */
+.missive-cover {
+  font-family: "Fira Mono", serif;
+  font-size: 18px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  position: absolute;
+  left: 50%; /* Centré horizontalement */
+  top: 50%; /* Centré verticalement */
+  transform: translate(-50%, -50%); /* Ajustement pour le centrage */
+  color: black; /* Style par défaut */
+  z-index: 1;
+}
+.missive-texture {
+  background-image: url(/image/missive.png);
+  background-size: cover;
+  background-position: center;
+}
+
+.machine {
+  background-image: url(/image/machine.png);
+  background-size: cover;
+  background-position: center;
+  mask: unset;
+}
+
+.machine_display{
+  position: relative;
+  top:255px;
+  left : 121px;
+  width: 260px;
+  height: 70px;
+  font-family: "Fira Mono", serif;
+  text-align: center;
+  color: rgb(32, 189, 32);
+  font-size: 30px;
+  font-weight: 500;
+  text-shadow: 0 0 18px rgb(32, 255, 32); /* Lueur plus forte */
+  text-overflow: clip;
+  text-wrap: balance;
+  word-break: break-all;
+  overflow: hidden;
+  align-content: center;
+  }
+
+/* Style pour le conteneur du message */
+.message-container {
+  position: absolute;
+  border-radius: 20px;
+  background-image: url(/texture/paper.jpg);
+  height: 200px; /* Ajuster la hauteur du message */
+  top : 850px;
+  left: 1050px;
+  overflow: hidden;
+  white-space: nowrap; /* Empêche le texte de se couper */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: end;
+}
+
+/* Style pour le texte du message qui défile */
+.message-text {
+  padding-right: 100px;
+  font-size: 100px;
+  font-family: "Fira Mono", serif;
+  letter-spacing: -1px;
+}
+
+.emote {
+  width: 24px;
+  height: 24px;
+  vertical-align: middle; /* Aligne l'emote avec le texte */
+}
+
+video {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background: transparent;
+}
+
+
+.panel > .child-component{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.panel-text {
+  font-family: "Fira Mono", serif;
+  font-size: 50px;
+  color : #0006;
+  padding: 5%;
+  text-shadow: 2px 2px 2px rgba(0,0,0,0.5),
+               -2px -2px 2px rgba(255,255,255,0.5),
+               4px 4px 4px rgba(0,0,0,0.3),
+               -4px -4px 4px rgba(255, 255, 255, 0.651);
+  max-width: fit-content;
+  text-align: center;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(2px, -2px); }
+  50% { transform: translate(-2px, 2px); }
+  75% { transform: translate(2px, 2px); }
+}
+
+@keyframes explode {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+.shake {
+  animation: shake 0.5s ease-in-out infinite;
+}
+
+.explode {
+  animation: explode 1s ease-out forwards;
+}
+
