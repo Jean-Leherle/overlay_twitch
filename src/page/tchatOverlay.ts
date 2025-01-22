@@ -15,9 +15,10 @@ export class ChatOverlay {
 
   private missiveList: Missive[] = [];
 
+
   private readonly TOTAL_HEIGHT = 4000;
 
-  private readonly fallingSpeed: number = 2000
+  private readonly fallingSpeed: number = 1000
   constructor(containerId: string) {
     this.container = document.getElementById(containerId);
 
@@ -45,7 +46,6 @@ export class ChatOverlay {
 
     this.createMachineElement();
 
-    this.bindEvents()
     this.initiMissiveTreatement()
     connectToTwitchChat(this.handleNewMessage.bind(this));
   }
@@ -112,17 +112,6 @@ export class ChatOverlay {
   }
 
 
-
-  private bindEvents() {
-    if (!this.chatContainer) return;
-    this.chatContainer.addEventListener('missiveOpened', async (event) => {
-      const missive = (event as CustomEvent).detail as Missive;
-
-      await this.showMessage(missive.parsedMessage.message)
-      missive.close()
-    });
-  }
-
   private async showNameOnDisplay(name: string): Promise<void> {
     if (!this.machineDisplay) return
     this.machineDisplay.innerText = ''
@@ -149,7 +138,7 @@ export class ChatOverlay {
 
     await new Promise(resolve => setTimeout(resolve, 0)); // Attendre un cycle pour que le DOM soit mis à jour
     const totalWidth = messageText.offsetWidth;
-    for (let i = 0; i < totalWidth + 100; i += 10) {
+    for (let i = 0; i < totalWidth + 110; i += 15) {
       messageContainer.style.width = `${i}px`;
       await new Promise(resolve => setTimeout(resolve, 25));
     }
@@ -194,8 +183,8 @@ export class ChatOverlay {
   }
 
 
-  private initiMissiveTreatement() {
-    setInterval(async () => {
+  private async initiMissiveTreatement() {
+    while (true) {
       const firstMissive = this.missiveList[0]
       if (firstMissive && firstMissive.position.y === this.inputHeight) {
         await firstMissive.moveTo({ x: firstMissive.position.x + 400, y: firstMissive.position.y }, 400)
@@ -203,9 +192,13 @@ export class ChatOverlay {
         this.allGoDown()
         this.showNameOnDisplay(firstMissive.parsedMessage.username)
         await firstMissive.moveTo({ x: firstMissive.position.x, y: firstMissive.position.y + 80 }, 400)
-        firstMissive.open()
+        await firstMissive.open()
+
+        await this.showMessage(firstMissive.parsedMessage.message)
+        firstMissive.close()
       }
-    }, 4000)
+      else await new Promise(resolve => setTimeout(resolve, 5000))
+    }
   }
 
 

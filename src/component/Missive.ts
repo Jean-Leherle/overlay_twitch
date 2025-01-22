@@ -69,8 +69,7 @@ export class Missive extends Base {
     this.rotateState = 90;
 
     this.state = "open";
-    this.parentElement.dispatchEvent(new CustomEvent('missiveOpened', { detail: this, bubbles: true }));
-
+    return
   }
 
   public async close(): Promise<void> {
