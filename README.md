@@ -42,13 +42,11 @@ Le code peut être uniformisé en particulier concernant l'utilisation des compo
 ## Mettre à disposition de l'utilisateur ##
 
 - dossier dist
-- .env
 - script.lua
 - server.exe
 - config_obs
 
 ## Probleme connu en cours ##
 
-1_Immense consomation de ressources durant le traitement des "steam" NE PAS TROP EN METTRE
-2_sub non pris en charge
-3_pixel restant aprés l'animation steam
+sub non pris en charge
+cumulation de déplacement impossible
