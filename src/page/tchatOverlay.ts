@@ -187,8 +187,7 @@ export class ChatOverlay {
   private async initiMissiveTreatement() {
     while (true) {
       if (this.missiveList.length > this.MAXMESSAGECOUNT) {
-        this.triggerOverload()
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        await this.triggerOverload()
       }
       else {
         const firstMissive = this.missiveList[0]
@@ -233,7 +232,7 @@ export class ChatOverlay {
     this.steamElement.forEach(steam => steam.parentElement?.classList.add('shake'));
 
     // Attendre un moment pour le tremblement
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 4000));
 
     this.missiveList.forEach((missive, index) => {
       missive.moveTo({ x: -400, y: missive.position.y - index * 100 }, 500)
