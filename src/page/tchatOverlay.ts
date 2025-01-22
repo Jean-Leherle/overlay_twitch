@@ -17,6 +17,7 @@ export class ChatOverlay {
 
 
   private readonly TOTAL_HEIGHT = 4000;
+  private readonly MAXMESSAGECOUNT = 20;
 
   private readonly fallingSpeed: number = 1000
   constructor(containerId: string) {
@@ -185,19 +186,25 @@ export class ChatOverlay {
 
   private async initiMissiveTreatement() {
     while (true) {
-      const firstMissive = this.missiveList[0]
-      if (firstMissive && firstMissive.position.y === this.inputHeight) {
-        await firstMissive.moveTo({ x: firstMissive.position.x + 400, y: firstMissive.position.y }, 400)
-        this.missiveList.shift()
-        this.allGoDown()
-        this.showNameOnDisplay(firstMissive.parsedMessage.username)
-        await firstMissive.moveTo({ x: firstMissive.position.x, y: firstMissive.position.y + 80 }, 400)
-        await firstMissive.open()
-
-        await this.showMessage(firstMissive.parsedMessage.message)
-        firstMissive.close()
+      if (this.missiveList.length > this.MAXMESSAGECOUNT) {
+        this.triggerOverload()
+        await new Promise(resolve => setTimeout(resolve, 2000))
       }
-      else await new Promise(resolve => setTimeout(resolve, 5000))
+      else {
+        const firstMissive = this.missiveList[0]
+        if (firstMissive && firstMissive.position.y === this.inputHeight) {
+          await firstMissive.moveTo({ x: firstMissive.position.x + 400, y: firstMissive.position.y }, 400)
+          this.missiveList.shift()
+          this.allGoDown()
+          this.showNameOnDisplay(firstMissive.parsedMessage.username)
+          await firstMissive.moveTo({ x: firstMissive.position.x, y: firstMissive.position.y + 80 }, 400)
+          await firstMissive.open()
+
+          await this.showMessage(firstMissive.parsedMessage.message)
+          firstMissive.close()
+        }
+        else await new Promise(resolve => setTimeout(resolve, 5000))
+      }
     }
   }
 
@@ -218,6 +225,31 @@ export class ChatOverlay {
     if (this.container) {
       this.container.innerHTML = this.generateChatOverlayHTML();
     }
+  }
+
+  private async triggerOverload(): Promise<void> {
+    // Faire trembler tous les éléments
+    this.chatContainer?.classList.add('shake');
+    this.steamElement.forEach(steam => steam.parentElement?.classList.add('shake'));
+
+    // Attendre un moment pour le tremblement
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    this.missiveList.forEach((missive, index) => {
+      missive.moveTo({ x: -400, y: missive.position.y - index * 100 }, 500)
+    })
+    // Attendre la fin de l'animation d'explosion
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Réinitialiser les états
+    this.chatContainer?.classList.remove('shake', 'explode');
+
+    // Vider la liste et l'affichage
+    this.missiveList.forEach(missive => {
+      missive.parentElement.innerHTML = ''
+      missive.stopRealTimeUpdate()
+    });
+    this.missiveList = [];
   }
 
   private generateChatOverlayHTML(): string {

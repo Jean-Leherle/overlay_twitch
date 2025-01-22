@@ -146,3 +146,24 @@ video {
   max-width: fit-content;
   text-align: center;
 }
+
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(2px, -2px); }
+  50% { transform: translate(-2px, 2px); }
+  75% { transform: translate(2px, 2px); }
+}
+
+@keyframes explode {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+.shake {
+  animation: shake 0.5s ease-in-out infinite;
+}
+
+.explode {
+  animation: explode 1s ease-out forwards;
+}
+
