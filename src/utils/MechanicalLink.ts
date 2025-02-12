@@ -1,6 +1,6 @@
 import { Component } from "../component/Component";
 import { Gear } from "../component/Gear";
-import { Rack } from "../component/Rack";
+//import { Rack } from "../component/Rack";
 import { isRotatable } from '../component/RotatableComponent'
 
 
@@ -28,10 +28,7 @@ export class MechanicalLink<T extends Component, U extends Component> {
       originalSourceUpdate();
       this.apply();
     };
-
-
   }
-
 
   /**
    * Appliquer le lien mécanique.
@@ -58,21 +55,21 @@ export class MechanicalLink<T extends Component, U extends Component> {
     target.clockwise = (source.clockwise * -1) as 1 | -1
   }
 
-  static rackGear(initialAngle: number, initialTurn: number = 0) {
-    return (rack: Rack, gear: Gear) => {
-
-      const INITIAL_ANGLE = initialAngle //angle initial
-      const TEETH_SPACING = rack.size.width / rack.teeth.count; // Espacement des dents (px/dent)
-
-      // Calcul du nombre de tours (positif ou négatif)
-      const rotateState = gear.rotateState + INITIAL_ANGLE + (gear.totalTurns - initialTurn) * 360
-
-      const ANGLE_PER_TOOTH = gear.angleByTeeth; // Angle entre deux dents sur la crémaillère
-      const closerIndiceTeeth = Math.round(rotateState / ANGLE_PER_TOOTH); // Calcul de la dent la plus proche
-      const basePlacement = closerIndiceTeeth * TEETH_SPACING
-      const interPlacement = (rotateState / ANGLE_PER_TOOTH - closerIndiceTeeth) * TEETH_SPACING
-      gear.position.x = rack.position.x + interPlacement + basePlacement;
-      gear.position.y = rack.position.y - (gear.radius + gear.innerRadius); // Position Y fixe
-    }
-  }
+  /*  static rackGear(initialAngle: number, initialTurn: number = 0) {
+     return (rack: Rack, gear: Gear) => {
+ 
+       const INITIAL_ANGLE = initialAngle //angle initial
+       const TEETH_SPACING = rack.size.width / rack.teeth.count; // Espacement des dents (px/dent)
+ 
+       // Calcul du nombre de tours (positif ou négatif)
+       const rotateState = gear.rotateState + INITIAL_ANGLE + (gear.totalTurns - initialTurn) * 360
+ 
+       const ANGLE_PER_TOOTH = gear.angleByTeeth; // Angle entre deux dents sur la crémaillère
+       const closerIndiceTeeth = Math.round(rotateState / ANGLE_PER_TOOTH); // Calcul de la dent la plus proche
+       const basePlacement = closerIndiceTeeth * TEETH_SPACING
+       const interPlacement = (rotateState / ANGLE_PER_TOOTH - closerIndiceTeeth) * TEETH_SPACING
+       gear.position.x = rack.position.x + interPlacement + basePlacement;
+       gear.position.y = rack.position.y - (gear.radius + gear.innerRadius); // Position Y fixe
+     }
+   } */
 }

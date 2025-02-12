@@ -18,18 +18,33 @@ export function Movable<T extends new (...args: any[]) => Component>(Base: T) {
     }
 
     public async moveTo(destination: Position, duration: number): Promise<void> {
-      const initialPosition = { ...this.position };
-      let t = 0;
+      return new Promise((resolve) => {
+        const deltaX = destination.x - this.position.x;
+        const deltaY = destination.y - this.position.y;
 
-      const lerp = (start: number, end: number, t: number) => start + (end - start) * t; //linear interpolation : interpolation linéaire
+        // Création d'une animation CSS unique pour cet élément
+        const animationId = `move-${this.id}-${Date.now()}`;
 
-      while (t < duration) {
-        this.position.x = lerp(initialPosition.x, destination.x, t / duration);
-        this.position.y = lerp(initialPosition.y, destination.y, t / duration);
-        await new Promise(resolve => setTimeout(resolve, this.UPDATEFRAME));
-        t += this.UPDATEFRAME;
-      }
-      this.position = destination;
+        const styleSheet = document.styleSheets[0];
+        styleSheet.insertRule(`
+          @keyframes ${animationId} {
+            from { transform: translate(0, 0);}
+            to {transform: translate(${deltaX}px, ${deltaY}px);}
+          }
+        `, styleSheet.cssRules.length);
+
+        this.activeAnimations.set(animationId, `${duration}ms linear forwards`);
+        this.updateAnimationStyles();
+
+        setTimeout(() => {
+          this.activeAnimations.delete(animationId);
+          this.updateAnimationStyles();
+          this.position = destination;
+          this.renderPosition();
+          this.removeAnimationRule(animationId);
+          resolve();
+        }, duration);
+      });
     }
 
     public updatePosition(): void {

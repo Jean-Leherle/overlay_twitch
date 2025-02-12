@@ -19,10 +19,13 @@ export class Component {
   public position: Position;
   public size: Size;
   public zIndex: number;
-  public readonly UPDATEFRAME: number = 50;
   protected intervalId?: NodeJS.Timeout;
   protected visual: VisualConfig
   protected bgElement?: HTMLElement
+  private static id: number = 0
+  protected id: number = Component.id++
+  public activeAnimations: Map<string, string> = new Map();
+
 
   constructor(
     parent: HTMLElement,
@@ -45,7 +48,6 @@ export class Component {
     parent.appendChild(this.parentElement);
 
     // Lancer les mises à jour automatiques
-    this.startRealTimeUpdate();
   }
 
   protected initElement(classLabel?: string): HTMLElement {
@@ -73,17 +75,23 @@ export class Component {
     // Méthode générique, surchargeable dans les sous-classes
   }
 
-  private startRealTimeUpdate(): void {
-    this.intervalId = setInterval(() => {
-      this.update();
-      this.render();
-    }, this.UPDATEFRAME);
+
+  protected updateAnimationStyles(): void {
+    this.parentElement.style.animation = Array.from(this.activeAnimations.entries())
+      .map(([name, options]) => `${name} ${options}`)
+      .join(", ");
   }
 
-  public stopRealTimeUpdate(): void {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = undefined;
+  protected removeAnimationRule(animationName: string): void {
+    const styleSheet = document.styleSheets[0];
+    if (!styleSheet) return;
+
+    for (let i = 0; i < styleSheet.cssRules.length; i++) {
+      const rule = styleSheet.cssRules[i] as CSSKeyframesRule;
+      if (rule.name === animationName) {
+        styleSheet.deleteRule(i);
+        break; // Une seule suppression suffit
+      }
     }
   }
 
@@ -105,5 +113,15 @@ export class Component {
       this.bgElement.style.setProperty("--background-color", `${this.visual.color}`);
       this.bgElement.style.mask = `url('${this.visual.maskPath.replace('.svg', '-bg.svg')}') center/cover repeat`;
     }
+  }
+
+  protected get styleSheet(): CSSStyleSheet {
+    let styleSheet = document.styleSheets[0];
+    if (!styleSheet) {
+      const style = document.createElement("style");
+      document.head.appendChild(style);
+      styleSheet = document.styleSheets[document.styleSheets.length - 1];
+    }
+    return styleSheet;
   }
 }

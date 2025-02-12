@@ -3,7 +3,6 @@ import { Movable } from "./MovableComponent";
 import { Rotatable } from "./RotatableComponent";
 import { Position } from "../types/Position";
 import { ParsedMessage } from "../utils/tchatUtils";
-import { v7 as uuid } from "uuid";
 
 // Configuration spécifique pour Missive
 export interface MissiveConfig {
@@ -16,7 +15,6 @@ export interface MissiveConfig {
 const Base = Movable(Rotatable(Component));
 
 export class Missive extends Base {
-  public uuid: string = uuid()
   public parsedMessage: ParsedMessage;
   private coverTextElement: HTMLElement;
   public static readonly SIZE: { width: number, height: number } = { width: 300, height: 100 }
@@ -59,14 +57,10 @@ export class Missive extends Base {
   public async open(): Promise<void> {
     if (this.state !== "closed") return; // Si déjà ouvert ou en ouverture, ignorer
     this.state = "opening";
-    this.moveTo({ x: this.position.x + 140, y: this.position.y - 80 }, 12 * 45)
+    const openDelay = 540
+    this.moveTo({ x: this.position.x + 140, y: this.position.y - 80 }, openDelay)
     // Rortation de 90°
-    for (let i = 0; i <= 90; i += 2) {
-      this.rotateState = i;
-      //attendre 1s/90 = 11ms
-      await new Promise(resolve => setTimeout(resolve, 12));
-    }
-    this.rotateState = 90;
+    this.rotateTo(90, openDelay)
 
     this.state = "open";
     return
@@ -77,7 +71,6 @@ export class Missive extends Base {
     this.state = "closing";
     await this.moveTo({ x: this.position.x, y: this.position.y + 300 }, 400);
     this.parentElement.innerHTML = "";
-    this.stopRealTimeUpdate();
     this.state = "closed";
   }
 

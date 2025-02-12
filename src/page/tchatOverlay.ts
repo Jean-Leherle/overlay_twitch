@@ -80,7 +80,6 @@ export class ChatOverlay {
     this.machineDisplay.classList.add('machine_display')
     this.machineDisplay.innerText = ''
     this.fillbackSize()
-    machineComponent.stopRealTimeUpdate()
   }
 
   private fillbackSize() {
@@ -246,7 +245,6 @@ export class ChatOverlay {
     // Vider la liste et l'affichage
     this.missiveList.forEach(missive => {
       missive.parentElement.innerHTML = ''
-      missive.stopRealTimeUpdate()
     });
     this.missiveList = [];
   }
