@@ -56,20 +56,39 @@ export class Missive extends Base {
     this.adjustTextSizeToContainer();
   }
 
+  private animateRotationTo(targetAngle: number, duration: number = 1000): Promise<void> {
+    return new Promise(resolve => {
+      const startAngle = this.rotateState;
+      const angleDelta = targetAngle - startAngle;
+      const startTime = performance.now();
+
+      const step = (timestamp: number) => {
+        const elapsed = timestamp - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        this.rotateState = startAngle + angleDelta * progress;
+
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          this.rotateState = targetAngle;
+          resolve();
+        }
+      };
+
+      requestAnimationFrame(step);
+    });
+  }
+
   public async open(): Promise<void> {
-    if (this.state !== "closed") return; // Si déjà ouvert ou en ouverture, ignorer
+    if (this.state !== "closed") return;
     this.state = "opening";
-    this.moveTo({ x: this.position.x + 140, y: this.position.y - 80 }, 12 * 45)
-    // Rortation de 90°
-    for (let i = 0; i <= 90; i += 2) {
-      this.rotateState = i;
-      //attendre 1s/90 = 11ms
-      await new Promise(resolve => setTimeout(resolve, 12));
-    }
-    this.rotateState = 90;
+
+    await Promise.all([
+      this.moveTo({ x: this.position.x + 140, y: this.position.y - 80 }, 12 * 45),
+      this.animateRotationTo(90, 12 * 45)
+    ])
 
     this.state = "open";
-    return
   }
 
   public async close(): Promise<void> {

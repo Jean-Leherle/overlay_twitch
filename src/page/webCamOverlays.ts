@@ -131,8 +131,8 @@ export class WebcamOverlay {
     setPerfectRotateState(cornerGearTL, lineY[0]);
 
     irregularRotate(cornerGearTL, {
-      acceleration: 0.5,
-      maxSpeed: 1,
+      acceleration: 0.01,
+      maxSpeed: 5,
       minSpeed: 0.1,
       runningTime: 5000,
       waitingTime: 2000

@@ -25,36 +25,68 @@ interface IrregularRotateOptions {
 export function irregularRotate(gear: Gear, options: IrregularRotateOptions = {}) {
   const {
     acceleration = 1,
-    maxSpeed = 1,
-    minSpeed = 0,
+    maxSpeed = 10,
+    minSpeed = 0.1,
     waitingTime = 1000,
     runningTime = 2000
   } = options;
 
   let speed = minSpeed;
-  const accelPerMs = acceleration / 100; // Speed change per millisecond
+  let phase: 'accelerating' | 'running' | 'decelerating' | 'waiting' = 'accelerating';
+  let phaseStartTime: number | null = null;
 
-  setInterval(() => {
-    const speedUpInterval = setInterval(() => {
-      if (speed < maxSpeed) {
-        speed += accelPerMs;
+  const accelPerMs = acceleration / 1000;
+
+  function step(timestamp: number) {
+    if (!phaseStartTime) phaseStartTime = timestamp;
+    const elapsed = timestamp - phaseStartTime;
+
+    switch (phase) {
+      case 'accelerating':
+        speed = Math.min(maxSpeed, speed + accelPerMs * elapsed);
         gear.rotationSpeed = speed;
-      } else {
-        clearInterval(speedUpInterval);
-      }
-    }, 1);
 
-    setTimeout(() => {
-      const slowDownInterval = setInterval(() => {
-        if (speed > minSpeed) {
-          speed -= accelPerMs;
-          gear.rotationSpeed = speed;
-        } else {
-          clearInterval(slowDownInterval);
+        if (speed >= maxSpeed) {
+          speed = maxSpeed;
+          phase = 'running';
+          phaseStartTime = timestamp;
         }
-      }, 1);
-    }, waitingTime);
-  }, runningTime);
+        break;
+
+      case 'running':
+        gear.rotationSpeed = speed;
+
+        if (elapsed >= runningTime) {
+          phase = 'decelerating';
+          phaseStartTime = timestamp;
+        }
+        break;
+
+      case 'decelerating':
+        speed = Math.max(minSpeed, speed - accelPerMs * elapsed);
+        gear.rotationSpeed = speed;
+
+        if (speed <= minSpeed) {
+          speed = minSpeed;
+          phase = 'waiting';
+          phaseStartTime = timestamp;
+        }
+        break;
+
+      case 'waiting':
+        gear.rotationSpeed = speed;
+
+        if (elapsed >= waitingTime) {
+          phase = 'accelerating';
+          phaseStartTime = timestamp;
+        }
+        break;
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  requestAnimationFrame(step);
 }
 
 type coordonateConfig = { innerRadius: number } & (

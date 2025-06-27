@@ -46,7 +46,6 @@ export class SteamComponent extends Component {
   }
 
   public play(playCount: number | null = null): void {
-    console.log('play ');
 
     if (this.isPlaying) {
       return; // Empêche de relancer si déjà en lecture
