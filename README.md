@@ -25,6 +25,7 @@ OBS et les navigateurs bloquent au travers des CORS les page html ouvertes local
 ## Configuration ##
 
 Voir avec le fichier `.env.example` pour créer votre propre `.env` avec les bon token et bon nom de chaine. L'id est donné lors de la création d'une app twitch. Le token est présent dans l'adresse aprés redirection.
+Une alternative est d'utiliser : https://twitchtokengenerator.com/
 
 ## Pour dev ##
 
